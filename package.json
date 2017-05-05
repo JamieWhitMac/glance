@@ -1,0 +1,30 @@
+{
+  "name": "glance",
+  "version": "1.0.0",
+  "description": "App for viewing live data from Dota 2",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node app"
+  },
+  "dependencies": {
+    "express": "*",
+    "mongoose": "*",
+    "bcryptjs": "*",
+    "cors": "*",
+    "jsonwebtoken": "*",
+    "body-parser": "*",
+    "passport": "*",
+    "passport-jwt": "*"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JamieWhitMac/glance.git"
+  },
+  "author": "Jamie Macdonald",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/JamieWhitMac/glance/issues"
+  },
+  "homepage": "https://github.com/JamieWhitMac/glance#readme"
+}
