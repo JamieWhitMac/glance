@@ -1,21 +1,41 @@
 <!DOCTYPE html>
 <html>
-<head>
-<link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css" />
-<script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
-<script src="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
-<script src="scripts.js"></script>
-</head>
-<body>
-<div data-role="page">
-    <div data-role="main" class = "ui-content">
-<h2>This is a heading</h2>
+    <head>
+        <link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css" />
+        <script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
+        <script src="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+        <script src="scripts.js"></script>
+    </head>
+    <body>
+        <div data-role="page" id="matchSelector">
+            <div data-role="main" class = "ui-content">
+                <h2>Glance for Dota</h2>
+                <p>Please select a match:</p>
+                <div class="ui-field-contain">
+                    <select name="select-custom-21" id="selector" data-native-menu="false">
+                        <option value="choose-one" data-placeholder="true">Choose one...</option>
+                        <option value="1">The 1st Option</option>
+                        <option value="2">The 2nd Option</option>
+                        <option value="3">The 3rd Option</option>
+                        <option value="4">The 4th Option</option>
+                    </select>
 
-<p>This is a paragraph.</p>
-<p>This is another paragraph.</p>
+                </div>
+                <a href="#glanceVisualisation" id = "matchSelectButton" class="ui-btn ui-corner-all" data-transition="slide">Select Match</a>
+            </div>
+        </div>
+        <div data-role="page" id="glanceVisualisation">
+            <div data-role="main" class = "ui-content">
+                <h2>Glance for Dota</h2>
 
-<button id = "databutton">Click me</button>
-</div>
-</div>
-</body>
+                <p>Visualisation here.</p>
+
+                <button id = "databutton">Get Data</button>
+                <button id = "namesbutton">Get Names</button>
+                <button id = "teamsbutton">Get Teams</button>
+                <button id = "heroesbutton">Get Heroes</button>
+                <button id = "playersbutton">Get Players</button>
+            </div>
+        </div>
+    </body>
 </html>

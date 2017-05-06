@@ -28,3 +28,24 @@ module.exports.getData = function(name, callback) {
           }
       });
 }
+
+module.exports.getDistinct = function(field, property, callback){
+    const collection = mongoose.connection.collection("propertyStream");
+
+    const query = {propertyName: property}
+
+      collection.distinct(field, query, function(err, items) {
+          if (err) {
+              console.log("Broken");
+              throw err;
+          }
+          if (items) {
+              console.log(items);
+              callback(null, items);
+          }
+      });
+}
+
+module.exports.getMatches = function(callback) {
+    
+}
