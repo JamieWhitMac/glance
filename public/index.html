@@ -4,8 +4,12 @@
         <link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css" />
         <script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
         <script src="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
+        <script src="heatmap.js"></script>
         <script src="scripts.js"></script>
     </head>
+    <style>
+        .heatmap {width: 500px; height: 500px}
+    </style>
     <body>
         <div data-role="page" id="matchSelector">
             <div data-role="main" class = "ui-content">
@@ -30,11 +34,16 @@
 
                 <p>Visualisation here.</p>
 
-                <button id = "databutton">Get Data</button>
+                  <div class="heatmap" width = 100 height = 100>
+
+                  </div>
+
+                <button id = "playersbutton">Get Players</button>
                 <button id = "namesbutton">Get Names</button>
                 <button id = "teamsbutton">Get Teams</button>
-                <button id = "heroesbutton">Get Heroes</button>
-                <button id = "playersbutton">Get Players</button>
+                <button id = "getpositionsbutton">Get Positions</button>
+                <button id = "heatmapbutton">Create Heatmap</button>
+                <button id = "databutton">Get Data</button>
             </div>
         </div>
     </body>

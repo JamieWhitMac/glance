@@ -15,7 +15,8 @@
     "jsonwebtoken": "*",
     "body-parser": "*",
     "passport": "*",
-    "passport-jwt": "*"
+    "passport-jwt": "*",
+    "heatmap.js":"2.0.5"
   },
   "repository": {
     "type": "git",

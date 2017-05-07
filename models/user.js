@@ -29,6 +29,29 @@ module.exports.getData = function(name, callback) {
       });
 }
 
+module.exports.getLatestDataAboutEntity = function(entity, property, limit, callback) {
+    console.log(property);
+    //var data;
+      const collection = mongoose.connection.collection("propertyStream");
+      console.log(collection.name);
+      const query = {propertyName: property, entityID: entity}
+      var options = {
+          "sort": [["_id","desc"],["entityID","desc"]],
+          "limit": limit
+      }
+
+      collection.find(query, options).toArray(function(err, items) {
+          if (err) {
+              console.log("Broken");
+              throw err;
+          }
+          if (items) {
+              console.log(items);
+              callback(null, items);
+          }
+      });
+}
+
 module.exports.getDistinct = function(field, property, callback){
     const collection = mongoose.connection.collection("propertyStream");
 

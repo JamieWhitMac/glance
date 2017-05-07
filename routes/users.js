@@ -86,6 +86,25 @@ router.get("/getheroes", (req, res, next) => {
     });
 });
 
+// Get latest positions
+router.get("/getlatestpositions", (req, res, next) => {
+    User.getLatestDataAboutEntity(req.query.hero, "Position", 50, (err, data) => {
+        if (err) throw err;
+        if (data) {
+         console.log("Positions here");
+         console.log(data);
+         res.send(data);
+        }
+        if (!data) {
+            res.send("No positions");
+        }
+    });
+});
+
+
+
+
+
 // Get match IDs
 router.get("/getmatches", (req, res, next) => {
     User.getMatches("Position", (err, data) => {
