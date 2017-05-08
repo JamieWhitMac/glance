@@ -3,39 +3,16 @@ var playerList;
 var heroList;
 var teamList;
 
+var canvas;
+var ctx;
+
 $( document ).ready(function() {
 
-    // minimal heatmap instance configuration
-//var heatmapInstance = h337.create({
-  // only container is required, the rest will be defaults
-//  container: document.querySelector('.heatmap')
-//});
-
-// now generate some random data
-var points = [];
-var max = 0;
-var width = 500;
-var height = 500;
-var len = 200;
-
-while (len--) {
-  var val = Math.floor(Math.random()*100);
-  max = Math.max(max, val);
-  var point = {
-    x: Math.floor(Math.random()*width),
-    y: Math.floor(Math.random()*height),
-    value: val
-  };
-  points.push(point);
-}
-// heatmap data format
-//var data = { 
-//  max: max, 
-//  data: points 
-//};
-// if you have a set of datapoints always use setData instead of addData
-// for data initialization
-// heatmapInstance.setData(data);
+canvas = document.getElementById("canvas");
+ctx = canvas.getContext("2d");
+//ctx.moveTo(0,0);
+//ctx.lineTo(200,100);
+//ctx.stroke();
 
     playerList = [];
     heroList = [];
@@ -109,7 +86,10 @@ while (len--) {
 
     $("#heatmapbutton").on("click", function() {
         generateHeatmap();
-       // console.log("Hello there.");
+    });
+
+    $("#drawheroesbutton").on("click", function() {
+        drawPlayers();
     });
 
 
@@ -212,12 +192,12 @@ var heatmapInstance = h337.create({
             var weightVal;
 
             var splitString = position.currentPropertyValue.split(",");
-            xPos = parseInt(splitString[0])*(-1)/30;
-            yPos = parseInt(splitString[1])*(-1)/30;
+            xPos = convertToRange(parseInt(splitString[0]), [(-7500), 7500], [0, 500]);
+            yPos = convertToRange(parseInt(splitString[1]), [(-7500), 7500], [0, 500]);
             weightVal = 1;
             var point = {
                 x: xPos,
-                y: yPos,
+                y: 500-yPos,
                 value: weightVal
             };
             positionDataArray.push(point);
@@ -225,13 +205,36 @@ var heatmapInstance = h337.create({
     });
 
     var data = {
-        max: 80,
+        min: 0,
+        max: 20,
         data: positionDataArray
     };
 
     heatmapInstance.setData(data);
     console.log(data);
     console.log("Heatmap created, apparently");
+}
+
+function drawPlayers () {
+    teamList.forEach(function(team){
+        team.heroes.forEach(function(hero){
+            var splitString = hero.positions[0].currentPropertyValue.split(",");
+            console.log(splitString);
+            var xPos = convertToRange(parseInt(splitString[0]), [(-7500), 7500], [0, 500]);
+            var yPos = convertToRange(parseInt(splitString[1]), [(-7500), 7500], [0, 500]);
+            if (team.name=="dire") {
+                ctx.fillStyle = "#FF0000";
+            }
+            else {
+                ctx.fillStyle = "blue";
+            }
+            //ctx.strokeStyle = "#000000";            
+            ctx.beginPath();
+            ctx.arc(xPos,500-yPos,10,0,2*Math.PI);
+            //ctx.stroke();
+            ctx.fill();
+        });
+    });
 }
 
 // Object constructors
@@ -251,6 +254,23 @@ function Team(teamID, name) {
     this.name = name;
     this.heroes = [];
 }
+
+// Helper functions
+
+
+// http://stackoverflow.com/questions/10756313/javascript-jquery-map-a-range-of-numbers-to-another-range-of-numbers
+function convertToRange(value, srcRange, dstRange){
+  if (value < srcRange[0] || value > srcRange[1]){
+    return NaN; 
+  }
+
+  var srcMax = srcRange[1] - srcRange[0],
+      dstMax = dstRange[1] - dstRange[0],
+      adjValue = value - srcRange[0];
+
+  return (adjValue * dstMax / srcMax) + dstRange[0];
+}
+//
 
 // Reading functions
 

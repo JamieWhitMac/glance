@@ -9,12 +9,6 @@ router.get("/getpositiondata", (req, res, next) => {
     User.getData("Position", (err, data) => {
         if (err) throw err;
         if (data) {
-          //  console.log(data.currentPropertyValue);
-          //  var splitString = data.currentPropertyValue.split(",");
-          //  var xPos = splitString[0];
-          //  var yPos = splitString[1];
-          //  console.log("xPos: "+xPos);
-         //   console.log("yPos: "+yPos);
          console.log("data here");
          console.log(data);
          res.send(data);

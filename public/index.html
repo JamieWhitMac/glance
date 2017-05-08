@@ -8,7 +8,10 @@
         <script src="scripts.js"></script>
     </head>
     <style>
-        .heatmap {width: 500px; height: 500px}
+        .visualisation {width: 500px; height: 500px; padding: 0px; border: 0px; position: relative}
+        .heatmap {width: 500px; height: 500px; padding: 0px; border: 0px; position: absolute}
+        #canvas {width: 100%; height: 100%; padding: 0px; border: 1px solid #F00000; z-index: 20; position: absolute}
+        #mapimage {width: 100%; height: 100%; border: 0px; position: absolute; top:0px; left: 0px; right: 0px; bottom: 0px; position: absolute }
     </style>
     <body>
         <div data-role="page" id="matchSelector">
@@ -34,8 +37,11 @@
 
                 <p>Visualisation here.</p>
 
-                  <div class="heatmap" width = 100 height = 100>
-
+                <div class = "visualisation">
+                  <div class="heatmap">
+                    <img src="dota2map.jpg" id = "mapimage"></img>
+                    <canvas id = "canvas" width = "500" height = "500"></canvas>
+                  </div>
                   </div>
 
                 <button id = "playersbutton">Get Players</button>
@@ -43,6 +49,7 @@
                 <button id = "teamsbutton">Get Teams</button>
                 <button id = "getpositionsbutton">Get Positions</button>
                 <button id = "heatmapbutton">Create Heatmap</button>
+                <button id = "drawheroesbutton">Draw Heroes</button>
                 <button id = "databutton">Get Data</button>
             </div>
         </div>
