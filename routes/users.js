@@ -80,9 +80,9 @@ router.get("/getheroes", (req, res, next) => {
     });
 });
 
-// Get latest positions
-router.get("/getlatestpositions", (req, res, next) => {
-    User.getLatestDataAboutEntity(req.query.hero, "Position", 50, (err, data) => {
+// Get initial positions
+router.get("/getinitialpositions", (req, res, next) => {
+        User.getLatestDataAboutEntity(req.query.hero, "Position", req.query.limit, 0, (err, data) => {
         if (err) throw err;
         if (data) {
          console.log("Positions here");
@@ -94,6 +94,37 @@ router.get("/getlatestpositions", (req, res, next) => {
         }
     });
 });
+
+// Get latest positions
+router.get("/getlatestpositions", (req, res, next) => {
+    var heroArray = [];
+
+    heroArray.push(req.query.hero1);
+    heroArray.push(req.query.hero2);
+    heroArray.push(req.query.hero3);
+    heroArray.push(req.query.hero4);
+    heroArray.push(req.query.hero5);
+    heroArray.push(req.query.hero6);
+    heroArray.push(req.query.hero7);
+    heroArray.push(req.query.hero8);
+    heroArray.push(req.query.hero9);
+    heroArray.push(req.query.hero10);
+
+    console.log(heroArray);
+
+    User.getLatestDataAboutEntity(heroArray, "Position", req.query.limit, req.query.time, (err, data) => {
+        if (err) throw err;
+        if (data) {
+         console.log("Positions here");
+         console.log(data);
+         res.send(data);
+        }
+        if (!data) {
+            res.send("No positions");
+        }
+    });
+});
+
 
 
 
@@ -112,22 +143,6 @@ router.get("/getmatches", (req, res, next) => {
             res.send("No matches");
         }
     });
-});
-
-
-
-
-
-
-// Register
-router.post("/register", (req, res, next) => {
-    res.send("REGISTER");
-});
-
-
-// Authenticate
-router.post("/authenticate", (req, res, next) => {
-    res.send("AUTHENTICATE");
 });
 
 

@@ -29,15 +29,25 @@ module.exports.getData = function(name, callback) {
       });
 }
 
-module.exports.getLatestDataAboutEntity = function(entity, property, limit, callback) {
+module.exports.getLatestDataAboutEntity = function(entity, property, limit, time, callback) {
     console.log(property);
     //var data;
       const collection = mongoose.connection.collection("propertyStream");
       console.log(collection.name);
-      const query = {propertyName: property, entityID: entity}
+      console.log (entity);
+      var query;
+      var timeInt = parseInt(time);
+      if (Array.isArray(entity)){
+       query = {propertyName: property, entityID: {$in: entity}, gameTime: {$gt: timeInt}}
+      }
+      else {
+          query = {propertyName: property, entityID: entity}
+      }
+      console.log(query);
+      var limitInt = parseInt(limit);
       var options = {
           "sort": [["_id","desc"],["entityID","desc"]],
-          "limit": limit
+          "limit": limitInt
       }
 
       collection.find(query, options).toArray(function(err, items) {
@@ -51,6 +61,7 @@ module.exports.getLatestDataAboutEntity = function(entity, property, limit, call
           }
       });
 }
+
 
 module.exports.getDistinct = function(field, property, callback){
     const collection = mongoose.connection.collection("propertyStream");
