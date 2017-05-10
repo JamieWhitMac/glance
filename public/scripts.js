@@ -351,7 +351,7 @@ function generateHeatmap() {
 
 if (radiantHeatmap == null){
 radiantHeatmap = h337.create({
-  container: document.querySelector(".heatmap2")
+  container: document.querySelector("#radiantHeatmap")
 });
 }
 
@@ -388,11 +388,12 @@ radiantHeatmap = h337.create({
 function generateDireHeatmap() {
     if (direHeatmap == null) {
         direHeatmap = h337.create({
-            container: document.querySelector(".heatmap")
+            container: document.querySelector("#direHeatmap")
+            //container: $("#direHeatmap")
         });
     }
 
-       var team = teamList[0];
+    var team = teamList[0];
     console.log(team.name);
     var positionDataArray = [];
     team.heroes.forEach(function(hero){
