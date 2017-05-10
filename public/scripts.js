@@ -4,6 +4,7 @@ var heroList;
 var teamList;
 
 var heroDict;
+var teamDict;
 
 var movementsStored;
 var maxQueryResponse;
@@ -14,6 +15,8 @@ var loopTime;
 
 var radiantHeatmap;
 var direHeatmap;
+var radiantHeatmapConfig;
+var direHeatmapConfig;
 
 var canvas;
 var ctx;
@@ -30,12 +33,34 @@ ctx = canvas.getContext("2d");
     playerList = [];
     heroList = [];
     teamList = [];
-    heroDict = {};
 
-    movementsStored = 75;
+    heroDict = {};
+    teamDict = {};
+
+    movementsStored = 50;
     maxQueryResponse = 500;
 
     loopTime = 2000;
+
+    radiantHeatmapConfig = {
+        container: document.getElementById("radiantHeatmap"),
+        gradient: {
+    // enter n keys between 0 and 1 here
+    // for gradient color customization
+    ".5": "#1fafd3",
+    ".8": "#42d1f4",
+    ".95": "#96eaff"
+        }
+    }
+
+    direHeatmapConfig = {
+        container: document.getElementById("direHeatmap"),
+        gradient: {
+            ".5": "#d81145",
+            ".8": "#bc3659",
+            ".95": "#822e44"
+        }
+    }
 
     $("#databutton").on("click", function() {
         console.log("Hello there.");
@@ -306,6 +331,7 @@ function assignNames (nameObject) {
     else { 
         team = new Team(nameObject.entityID, nameObject.currentPropertyValue);
         teamList.push(team);
+        teamDict[team.name]=team;
     } 
 }
 
@@ -350,12 +376,9 @@ function getPositions (teamObject) {
 function generateHeatmap() {
 
 if (radiantHeatmap == null){
-radiantHeatmap = h337.create({
-  container: document.querySelector("#radiantHeatmap")
-});
+radiantHeatmap = h337.create(radiantHeatmapConfig);
 }
-
-    var team = teamList[1];
+    var team = teamDict["radiant"];
     console.log(team.name);
     var positionDataArray = [];
     team.heroes.forEach(function(hero){
@@ -374,7 +397,7 @@ radiantHeatmap = h337.create({
 
     var data = {
         min: 0,
-        max: 20,
+        max: 10,
         data: positionDataArray
     };
 
@@ -387,13 +410,10 @@ radiantHeatmap = h337.create({
 
 function generateDireHeatmap() {
     if (direHeatmap == null) {
-        direHeatmap = h337.create({
-            container: document.querySelector("#direHeatmap")
-            //container: $("#direHeatmap")
-        });
+        direHeatmap = h337.create(direHeatmapConfig);
     }
 
-    var team = teamList[0];
+    var team = teamDict["dire"];
     console.log(team.name);
     var positionDataArray = [];
     team.heroes.forEach(function(hero){
@@ -412,11 +432,11 @@ function generateDireHeatmap() {
 
     var data = {
         min: 0,
-        max: 20,
+        max: 10,
         data: positionDataArray
     };
 
-    radiantHeatmap.setData(data);
+    direHeatmap.setData(data);
     console.log(data);
     console.log("Heatmap created.");
 }
