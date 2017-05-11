@@ -141,6 +141,24 @@ router.get("/getlatestpositions", (req, res, next) => {
     });
 });
 
+// Get Health data
+
+router.get("/gethealthdata", (req, res, next) => {
+    User.getByProperties("propertyName", "propertyName", "CurrentHealth", "CurrentMaxHealth", (err, data) => {
+        if (err) throw err;
+        if (data) {
+         console.log("Health data here");
+         console.log(data);
+         res.send(data);
+        }
+        if (!data) {
+            res.send("No health data");
+        }
+    });
+});
+
+
+
 
 
 

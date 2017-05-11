@@ -11,10 +11,9 @@ module.exports.getData = function(name, callback) {
     //var data;
       const collection = mongoose.connection.collection("propertyStream");
       console.log(collection.name);
-      const query = {propertyName: name}
+      const query = {propertyName: name};
       var options = {
-          "sort": [["_id","desc"],["entityID","desc"]],
-          "limit": 50
+          "sort": [["_id","desc"],["entityID","desc"]]
       }
 
       collection.find(query, options).toArray(function(err, items) {
@@ -38,7 +37,7 @@ module.exports.getLatestDataAboutEntity = function(entity, property, limit, time
       var query;
       var timeInt = parseInt(time);
       if (Array.isArray(entity)){
-       query = {propertyName: property, entityID: {$in: entity}, gameTime: {$gt: timeInt}}
+       query = {propertyName: property, entityID: {$in: entity}, gameTime: {$gt: timeInt}};
       }
       else {
           query = {propertyName: property, entityID: entity}
@@ -66,7 +65,7 @@ module.exports.getLatestDataAboutEntity = function(entity, property, limit, time
 module.exports.getDistinct = function(field, property, callback){
     const collection = mongoose.connection.collection("propertyStream");
 
-    const query = {propertyName: property}
+    const query = {propertyName: property};
 
       collection.distinct(field, query, function(err, items) {
           if (err) {
@@ -82,7 +81,7 @@ module.exports.getDistinct = function(field, property, callback){
 
 module.exports.getByEntityType = function(type, callback){
     const collection = mongoose.connection.collection("propertyStream");
-    const query = {entityType: type}
+    const query = {entityType: type};
 
     collection.find(query).toArray(function(err, items){
         if (err) {
@@ -93,6 +92,23 @@ module.exports.getByEntityType = function(type, callback){
               console.log(items);
               callback(null, items);
           }
+    });
+}
+
+module.exports.getByProperties = function(field1, field2, value1, value2, callback) {
+    const collection = mongoose.connection.collection("propertyStream");
+    const query = {$or: [{propertyName : value1}, {propertyName : value2}]};
+    console.log(query);
+
+    collection.find(query).toArray(function(err, items){
+        if(err) {
+            console.log("Broken");
+            throw err;
+        }
+        if (items) {
+            console.log(items);
+            callback(null, items);
+        }
     });
 }
 

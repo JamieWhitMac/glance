@@ -171,6 +171,7 @@ $(document).on("pagebeforehide","#matchSelector",function(){ // When leaving the
 function setupMatch() {
     getPlayers();
     getObserverData();
+    getHealthData();
 }
 
 function getPlayers() {
@@ -235,14 +236,16 @@ function getInitialHeroPositions() {
                 response.forEach(function(movement) {
             logMovement(movement);
             });
-            generateRadiantControlHeatmap();
-            generateDireControlHeatmap();
-            drawPlayers();
-            loopingInterval = setInterval(getHeroPositions, loopTime);
             }
         });
     });
-    });
+});
+            generateRadiantControlHeatmap();
+            generateDireControlHeatmap();
+            getObserverData();
+            getHealthData();
+            drawPlayers();
+loopingInterval = setInterval(updateLoop, loopTime);
 }
 
 function createPlayers(playerObject){
@@ -295,6 +298,16 @@ function assignTeams (teamObject) {
 
 // End of first time setup
 
+function updateLoop() {
+    getHeroPositions();
+    generateRadiantControlHeatmap();
+    generateDireControlHeatmap();
+    getObserverData();
+    getHealthData();
+    drawPlayers();
+   console.log("loop!");
+}
+
 function getHeroPositions() {
        var requrl = "/users/getlatestpositions?";
         if (heroList.length == 10) {
@@ -325,10 +338,10 @@ function getHeroPositions() {
                 response.forEach(function(movement) {
                 logMovement(movement);
             });
-            generateRadiantControlHeatmap();
-            generateDireControlHeatmap();
-            getObserverData();
-            drawPlayers();
+          //  generateRadiantControlHeatmap();
+          //  generateDireControlHeatmap();
+          //  getObserverData();
+          //  drawPlayers();
             }
         });
 }
@@ -396,6 +409,33 @@ function updateObservers(observerData) {
     });
 
     console.log(observerDict);
+}
+
+function getHealthData() {
+    $.ajax({
+        url:"/users/gethealthdata",
+        contentType: "application/json",
+        success: function(response) {
+            console.log(response);
+            assignHealthData(response);
+            }
+        });
+}
+
+function assignHealthData(data) {
+    data.forEach(function (healthObject) {
+        var splitString = healthObject.entityID.split(",");
+        var heroID = splitString[0];
+        var healthProperty = splitString[1];
+        if (heroDict[heroID]!=null){
+        if(healthProperty == "CurrentMaxHealth") {
+            heroDict[heroID].maxHealth = healthObject.currentPropertyValue;
+        }
+        if(healthProperty == "CurrentHealth") {
+            heroDict[heroID].health = healthObject.currentPropertyValue;
+        }
+        }
+    });
 }
 
 
@@ -476,6 +516,7 @@ function drawPlayers () {
     ctx.clearRect(0, 0, canvas.width, canvas.height)
     teamList.forEach(function(team){
         team.heroes.forEach(function(hero){
+            if (hero.positions[hero.positions.length-1]!=null){
             var xPos = convertToRange(hero.positions[hero.positions.length-1].xPos, [(-7500), 7500], [0, 500]);
             var yPos = convertToRange(hero.positions[hero.positions.length-1].yPos, [(-7500), 7500], [0, 500]);
             if (team.name=="dire") {
@@ -484,20 +525,34 @@ function drawPlayers () {
             else {
                 ctx.fillStyle = "blue";
             }
-            //ctx.strokeStyle = "#000000";            
+
+            var healthPortion = (hero.health/hero.maxHealth)*2;
+           
             ctx.beginPath();
-            ctx.arc(xPos,500-yPos,10,0,2*Math.PI);
-            //ctx.stroke();
+            ctx.arc(xPos,500-yPos,20,(-0.5)*Math.PI,(healthPortion-0.5)*Math.PI);
+            ctx.lineTo(xPos, 500-yPos);
             ctx.fill();
+
+            ctx.beginPath();
+            ctx.arc(xPos,500-yPos,15,0,2*Math.PI);
+            ctx.fillStyle = "#000000"; 
+            ctx.fill();
+            }
         });
     });
 
+   // drawObservers();
+}
+
+   function drawObservers () {
     for (var observer in observerDict) {
         var ward = observerDict[observer];
+        if (ward.xPos != null && ward.yPos != null){
         var xPos = convertToRange(ward.xPos, [(-7500), 7500], [0, 500]);
         var yPos = convertToRange(ward.yPos, [(-7500), 7500], [0, 500]);
         console.log(xPos);
         console.log(yPos);
+        if (ward.hero != null){
         if (ward.hero.team.name=="dire") {
                 ctx.fillStyle = "#FF0000";
             }
@@ -508,8 +563,10 @@ function drawPlayers () {
             ctx.arc(xPos,500-yPos,20,0,2*Math.PI);
             //ctx.stroke();
             ctx.fill();
+        }
+        }
     }
-}
+    }
 
 // Object constructors
 
