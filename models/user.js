@@ -80,6 +80,22 @@ module.exports.getDistinct = function(field, property, callback){
       });
 }
 
+module.exports.getByEntityType = function(type, callback){
+    const collection = mongoose.connection.collection("propertyStream");
+    const query = {entityType: type}
+
+    collection.find(query).toArray(function(err, items){
+        if (err) {
+              console.log("Broken");
+              throw err;
+          }
+          if (items) {
+              console.log(items);
+              callback(null, items);
+          }
+    });
+}
+
 module.exports.getMatches = function(callback) {
     
 }

@@ -5,6 +5,7 @@ var teamList;
 
 var heroDict;
 var teamDict;
+var observerDict;
 
 var movementsStored;
 var maxQueryResponse;
@@ -25,9 +26,7 @@ $( document ).ready(function() {
 
 canvas = document.getElementById("canvas");
 ctx = canvas.getContext("2d");
-//ctx.moveTo(0,0);
-//ctx.lineTo(200,100);
-//ctx.stroke();
+
     currentGameTime = (-1000);
 
     playerList = [];
@@ -36,6 +35,7 @@ ctx = canvas.getContext("2d");
 
     heroDict = {};
     teamDict = {};
+    observerDict = {};
 
     movementsStored = 50;
     maxQueryResponse = 500;
@@ -45,8 +45,6 @@ ctx = canvas.getContext("2d");
     radiantHeatmapConfig = {
         container: document.getElementById("radiantHeatmap"),
         gradient: {
-    // enter n keys between 0 and 1 here
-    // for gradient color customization
     ".5": "#1fafd3",
     ".8": "#42d1f4",
     ".95": "#96eaff"
@@ -61,6 +59,8 @@ ctx = canvas.getContext("2d");
             ".95": "#822e44"
         }
     }
+
+    // Debugging buttons
 
     $("#databutton").on("click", function() {
         console.log("Hello there.");
@@ -143,6 +143,8 @@ ctx = canvas.getContext("2d");
         drawPlayers();
     });
 
+    //
+
 
 
 
@@ -154,7 +156,7 @@ $("#selector").change(function() {
 });
 
 
-$(document).on("pagebeforehide","#matchSelector",function(){ // When leaving pagetwo
+$(document).on("pagebeforehide","#matchSelector",function(){ // When leaving the Match Selector page.
     setupMatch();
   //console.log(selectedMatch);
  // var optionSelected = $("#select-custom-21")
@@ -168,6 +170,7 @@ $(document).on("pagebeforehide","#matchSelector",function(){ // When leaving pag
 
 function setupMatch() {
     getPlayers();
+    getObserverData();
 }
 
 function getPlayers() {
@@ -218,42 +221,6 @@ function getTeams() {
         });
 }
 
-function getHeroPositions() {
-        requrl = "/users/getlatestpositions?"
-        if (heroList.length == 10) {
-            var heroNumber = 1;
-            heroList.forEach(function(hero){
-                if (heroNumber == 1){
-                   var newurl = requrl+"hero"+heroNumber+"="+hero.heroID;
-                   requrl = newurl;
-                }
-                else {
-                var newurl =  requrl+"&hero"+heroNumber+"="+hero.heroID;
-                requrl = newurl;
-            }
-            console.log(requrl);
-            heroNumber++;
-            });
-        }
-        else {
-            console.log ("Wrong number of heroes: "+heroList.length);
-        }
-            var newurl = requrl+"&time="+currentGameTime+"&limit="+maxQueryResponse;
-            requrl = newurl;
-        $.ajax({
-            url:requrl,
-            contentType: "application/json",
-            success: function(response) {
-                response.reverse();
-                response.forEach(function(movement) {
-                logMovement(movement);
-            });
-            generateHeatmap();
-            }
-        });
-}
-
-
 function getInitialHeroPositions() {
     teamList.forEach(function(teamObject) {
     teamObject.heroes.forEach(function(hero){
@@ -268,39 +235,14 @@ function getInitialHeroPositions() {
                 response.forEach(function(movement) {
             logMovement(movement);
             });
-            generateHeatmap();
+            generateRadiantControlHeatmap();
+            generateDireControlHeatmap();
+            drawPlayers();
             loopingInterval = setInterval(getHeroPositions, loopTime);
             }
         });
     });
     });
-}
-
-function logMovement(movementData) {
-    var gameTime = movementData.gameTime;
-    if (gameTime>currentGameTime){
-        currentGameTime = gameTime;
-    }
-    var splitString = movementData.currentPropertyValue.split(",");
-    var xPos = parseInt(splitString[0]);
-    var yPos = parseInt(splitString[1]);
-    var movementObject = {
-        gameTime: gameTime,
-        xPos: xPos,
-        yPos: yPos
-     }
-     heroDict[movementData.entityID].positions.push(movementObject);
-     if (heroDict[movementData.entityID].positions.length>movementsStored){
-        heroDict[movementData.entityID].positions.shift();
-     }
-     console.log("logged");
-}
-
-
-
-
-function addNewMatch(matchID) {
-    $("#selector").append('<option value="'+matchID+'">'+matchID+'</option>');
 }
 
 function createPlayers(playerObject){
@@ -346,34 +288,125 @@ function assignTeams (teamObject) {
     heroList.forEach(function heroTeamAssignment(hero) {
         if (teamObject.entityID==hero.player.playerID) {
             selectedTeam.heroes.push(hero);
+            hero.team = selectedTeam;
         }
     });
 }
 
-function getPositions (teamObject) {
-    var heroNumber = 1;
-    teamObject.heroes.forEach(function(hero){
-        console.log("getting positions");
-        $.ajax({
-            url:"/users/getlatestpositions?hero="+hero.heroID,
-            contentType: "application/json",
-            //data: {id: "SomeID"},
-            success: function(response) {
-                console.log(response);
-                response.forEach(function(movement) {
-                    hero.positions.push(movement);
-                });
-                heroNumber++;
-                console.log(heroNumber);
-                if (heroNumber == 9) {
-                    generateHeatmap();
+// End of first time setup
+
+function getHeroPositions() {
+       var requrl = "/users/getlatestpositions?";
+        if (heroList.length == 10) {
+            var heroNumber = 1;
+            heroList.forEach(function(hero){
+                if (heroNumber == 1){
+                   var newurl = requrl+"hero"+heroNumber+"="+hero.heroID;
+                   requrl = newurl;
                 }
+                else {
+                var newurl =  requrl+"&hero"+heroNumber+"="+hero.heroID;
+                requrl = newurl;
+            }
+            console.log(requrl);
+            heroNumber++;
+            });
+        }
+        else {
+            console.log ("Wrong number of heroes: "+heroList.length);
+        }
+            var newurl = requrl+"&time="+currentGameTime+"&limit="+maxQueryResponse;
+            requrl = newurl;
+        $.ajax({
+            url:requrl,
+            contentType: "application/json",
+            success: function(response) {
+                response.reverse();
+                response.forEach(function(movement) {
+                logMovement(movement);
+            });
+            generateRadiantControlHeatmap();
+            generateDireControlHeatmap();
+            getObserverData();
+            drawPlayers();
             }
         });
-    });
 }
 
-function generateHeatmap() {
+function logMovement(movementData) {
+    var gameTime = movementData.gameTime;
+    if (gameTime>currentGameTime){
+        currentGameTime = gameTime;
+    }
+    var splitString = movementData.currentPropertyValue.split(",");
+    var xPos = parseInt(splitString[0]);
+    var yPos = parseInt(splitString[1]);
+    var movementObject = {
+        gameTime: gameTime,
+        xPos: xPos,
+        yPos: yPos
+     }
+     heroDict[movementData.entityID].positions.push(movementObject);
+     if (heroDict[movementData.entityID].positions.length>movementsStored){
+        heroDict[movementData.entityID].positions.shift();
+     }
+     console.log("logged");
+}
+
+function getObserverData() {
+    $.ajax({
+        url:"/users/getobserverdata",
+        contentType: "application/json",
+        success: function(response) {
+            console.log(response);
+            updateObservers(response);
+            }
+        });
+}
+
+function updateObservers(observerData) {
+    observerData.forEach(function(observerEntry) {
+        if (observerEntry.propertyName == "WardPlacedEvent") {
+            if (observerDict[observerEntry.entityID] == null) {
+                var splitString = observerEntry.currentPropertyValue.split(",");
+                var placedBy = splitString[0];
+                var xPos = parseInt(splitString[1]);
+                var yPos = parseInt(splitString[2]);
+
+                var newObserver = new Observer(observerEntry.entityID, heroDict[placedBy.toString()]);
+                console.log(heroDict[placedBy.toString()]);
+                console.log(newObserver.hero);
+                newObserver.xPos = xPos;
+                newObserver.yPos = yPos;
+                observerDict[observerEntry.entityID] = newObserver;
+            }
+        }
+
+        if (observerEntry.propertyName == "WardExpiredEvent") {
+            if (observerDict[observerEntry.entityID] != null) {
+                delete observerDict[observerEntry.entityID];
+            }
+        }
+
+        if (observerEntry.propertyName == "WardDestroyedEvent") {
+            if (observerDict[observerEntry.entityID] != null) {
+                delete observerDict[observerEntry.entityID];
+            }
+        }
+    });
+
+    console.log(observerDict);
+}
+
+
+
+//
+function addNewMatch(matchID) {
+    $("#selector").append('<option value="'+matchID+'">'+matchID+'</option>');
+}
+//
+
+function generateRadiantControlHeatmap() {
 
 if (radiantHeatmap == null){
 radiantHeatmap = h337.create(radiantHeatmapConfig);
@@ -404,11 +437,9 @@ radiantHeatmap = h337.create(radiantHeatmapConfig);
     radiantHeatmap.setData(data);
     console.log(data);
     console.log("Heatmap created.");
-    generateDireHeatmap();
-    drawPlayers();
 }
 
-function generateDireHeatmap() {
+function generateDireControlHeatmap() {
     if (direHeatmap == null) {
         direHeatmap = h337.create(direHeatmapConfig);
     }
@@ -460,6 +491,24 @@ function drawPlayers () {
             ctx.fill();
         });
     });
+
+    for (var observer in observerDict) {
+        var ward = observerDict[observer];
+        var xPos = convertToRange(ward.xPos, [(-7500), 7500], [0, 500]);
+        var yPos = convertToRange(ward.yPos, [(-7500), 7500], [0, 500]);
+        console.log(xPos);
+        console.log(yPos);
+        if (ward.hero.team.name=="dire") {
+                ctx.fillStyle = "#FF0000";
+            }
+            else {
+                ctx.fillStyle = "blue";
+            }
+            ctx.beginPath();
+            ctx.arc(xPos,500-yPos,20,0,2*Math.PI);
+            //ctx.stroke();
+            ctx.fill();
+    }
 }
 
 // Object constructors
@@ -480,8 +529,12 @@ function Team(teamID, name) {
     this.heroes = [];
 }
 
-// Helper functions
+function Observer(observerID, hero) {
+    this.observerID = observerID;
+    this.hero = hero;
+}
 
+// Helper functions
 
 // http://stackoverflow.com/questions/10756313/javascript-jquery-map-a-range-of-numbers-to-another-range-of-numbers
 function convertToRange(value, srcRange, dstRange){

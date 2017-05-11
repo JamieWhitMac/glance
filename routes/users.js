@@ -125,6 +125,21 @@ router.get("/getlatestpositions", (req, res, next) => {
     });
 });
 
+// Get observer data
+
+    router.get("/getobserverdata", (req, res, next) => {
+    User.getByEntityType("Nucleus.DataSources.Dota2.ObserverWardEntity", (err, data) => {
+        if (err) throw err;
+        if (data) {
+         console.log("Observers here");
+         console.log(data);
+         res.send(data);
+        }
+        if (!data) {
+            res.send("No observers");
+        }
+    });
+});
 
 
 
