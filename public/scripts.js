@@ -249,11 +249,13 @@ loopingInterval = setInterval(updateLoop, loopTime);
 }
 
 function createPlayers(playerObject){
+    if (playerObject.currentPropertyValue!="hero-1") {
     var player = new Player(playerObject.entityID);
     var hero = new Hero(playerObject.currentPropertyValue, player);
     playerList.push(player);
     heroList.push(hero);
     heroDict[playerObject.currentPropertyValue] = hero;
+    }
 }
 
 
