@@ -6,10 +6,10 @@ module.exports.getUserById = function(id, callback) {
     User.findById(id, callback);
 }
 
-module.exports.getData = function(name, callback) {
+module.exports.getData = function(name, matchID, callback) {
     console.log(name);
     //var data;
-      const collection = mongoose.connection.collection("propertyStream");
+      const collection = mongoose.connection.collection(matchID);
       console.log(collection.name);
       const query = {propertyName: name};
       var options = {
@@ -28,10 +28,10 @@ module.exports.getData = function(name, callback) {
       });
 }
 
-module.exports.getLatestDataAboutEntity = function(entity, property, limit, time, callback) {
+module.exports.getLatestDataAboutEntity = function(entity, property, limit, time, matchID, callback) {
     console.log(property);
     //var data;
-      const collection = mongoose.connection.collection("propertyStream");
+      const collection = mongoose.connection.collection(matchID);
       console.log(collection.name);
       console.log (entity);
       var query;
@@ -62,8 +62,8 @@ module.exports.getLatestDataAboutEntity = function(entity, property, limit, time
 }
 
 
-module.exports.getDistinct = function(field, property, callback){
-    const collection = mongoose.connection.collection("propertyStream");
+module.exports.getDistinct = function(field, property, matchID, callback){
+    const collection = mongoose.connection.collection(matchID);
 
     const query = {propertyName: property};
 
@@ -79,8 +79,8 @@ module.exports.getDistinct = function(field, property, callback){
       });
 }
 
-module.exports.getByEntityType = function(type, callback){
-    const collection = mongoose.connection.collection("propertyStream");
+module.exports.getByEntityType = function(type, matchID, callback){
+    const collection = mongoose.connection.collection(matchID);
     const query = {entityType: type};
 
     collection.find(query).toArray(function(err, items){
@@ -95,8 +95,8 @@ module.exports.getByEntityType = function(type, callback){
     });
 }
 
-module.exports.getByProperties = function(field1, field2, value1, value2, callback) {
-    const collection = mongoose.connection.collection("propertyStream");
+module.exports.getByProperties = function(field1, field2, value1, value2, matchID, callback) {
+    const collection = mongoose.connection.collection(matchID);
     const query = {$or: [{propertyName : value1}, {propertyName : value2}]};
     console.log(query);
 
@@ -113,5 +113,17 @@ module.exports.getByProperties = function(field1, field2, value1, value2, callba
 }
 
 module.exports.getMatches = function(callback) {
-    
+    const collection = mongoose.connection.collection("matchList");
+    const query = {};
+
+    collection.find(query).toArray(function(err, items){
+                if(err) {
+            console.log("Broken");
+            throw err;
+        }
+        if (items) {
+            console.log(items);
+            callback(null, items);
+        }
+    });
 }

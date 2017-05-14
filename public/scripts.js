@@ -1,3 +1,5 @@
+var matchDict;
+
 var selectedMatch;
 var playerList;
 var heroList;
@@ -6,13 +8,17 @@ var teamList;
 var heroDict;
 var teamDict;
 var observerDict;
+var heroIconDict;
 
 var movementsStored;
 var maxQueryResponse;
 var currentGameTime;
 
-var loopingInterval;
-var loopTime;
+var visualisationLoopingInterval;
+var visualisationLoopTime;
+
+var matchSelectUpdateInterval;
+var matchSelectLoopTime;
 
 var radiantHeatmap;
 var direHeatmap;
@@ -21,6 +27,8 @@ var direHeatmapConfig;
 
 var canvas;
 var ctx;
+
+var visualisationSize;
 
 $( document ).ready(function() {
 
@@ -33,14 +41,19 @@ ctx = canvas.getContext("2d");
     heroList = [];
     teamList = [];
 
+    matchDict = {};
+
     heroDict = {};
     teamDict = {};
     observerDict = {};
 
+    heroIconDict = {};
+
     movementsStored = 50;
     maxQueryResponse = 500;
 
-    loopTime = 2000;
+    visualisationLoopTime = 2000;
+    matchSelectLoopTime = 3000;
 
     radiantHeatmapConfig = {
         container: document.getElementById("radiantHeatmap"),
@@ -60,12 +73,14 @@ ctx = canvas.getContext("2d");
         }
     }
 
+    visualisationSize = $("#visualisationDiv").height();
+
     // Debugging buttons
 
     $("#databutton").on("click", function() {
         console.log("Hello there.");
         $.ajax({
-            url:"/users/getpositiondata",
+            url:"/users/getpositiondata?matchid="+selectedMatch,
             contentType: "application/json",
             success: function(response) {
                 console.log(response);
@@ -76,7 +91,7 @@ ctx = canvas.getContext("2d");
         $("#namesbutton").on("click", function() {
         console.log("Hello there.");
         $.ajax({
-            url:"/users/getnames",
+            url:"/users/getnames?matchid="+selectedMatch,
             contentType: "application/json",
             success: function(response) {
                 console.log(response);
@@ -89,7 +104,7 @@ ctx = canvas.getContext("2d");
            $("#teamsbutton").on("click", function() {
         console.log("Hello there.");
         $.ajax({
-            url:"/users/getteams",
+            url:"/users/getteams?matchid="+selectedMatch,
             contentType: "application/json",
             success: function(response) {
                 console.log(response);
@@ -102,7 +117,7 @@ ctx = canvas.getContext("2d");
              $("#heroesbutton").on("click", function() {
         console.log("Hello there.");
         $.ajax({
-            url:"/users/getheroes",
+            url:"/users/getheroes?matchid="+selectedMatch,
             contentType: "application/json",
             success: function(response) {
                 console.log(response);
@@ -113,7 +128,7 @@ ctx = canvas.getContext("2d");
         $("#playersbutton").on("click", function() {
         console.log("Hello there.");
         $.ajax({
-            url:"/users/getplayers",
+            url:"/users/getplayers?matchid="+selectedMatch,
             contentType: "application/json",
             success: function(response) {
                 console.log(response);
@@ -145,38 +160,96 @@ ctx = canvas.getContext("2d");
 
     //
 
-
-
-
-
-$("#selector").change(function() {
+$("#matchSel").change(function() {
     selectedMatch = this.value;
    // $("#selector").append('<option value="4">The 4th Option</option>');
-   addNewMatch("Hello");
+   console.log(selectedMatch);
 });
 
-
-$(document).on("pagebeforehide","#matchSelector",function(){ // When leaving the Match Selector page.
+// When leaving the Match Selector page
+$(document).on("pagebeforehide","#matchSelector",function(){
     setupMatch();
+    clearInterval(matchSelectUpdateInterval);
   //console.log(selectedMatch);
  // var optionSelected = $("#select-custom-21")
 });
+
+// When leaving the Visualisation page
+$(document).on("pagebeforehide","#glancevisualisation",function(){
+    // Refresh everything
+    matchSelectUpdateInterval = setInterval(selectMatchUpdateLoop, matchSelectLoopTime);
+    console.log("start interval");
+//setupMatch();
+  //console.log(selectedMatch);
+ // var optionSelected = $("#select-custom-21")
+});
+
+// Start match selector loop
+matchSelectUpdateInterval = setInterval(selectMatchUpdateLoop, matchSelectLoopTime);
 
 });
 
 // End of event listeners
 
-// First-time setup
+// Check for avaialable matches
+
+function selectMatchUpdateLoop() {
+               $.ajax({
+            url:"/users/getmatches",
+            contentType: "application/json",
+            success: function(response) {
+                console.log(response);
+                response.forEach(sortMatches);
+            }
+        });
+}
+
+function sortMatches(matchObject) {
+    var matchID = matchObject.matchID;
+    var state = matchObject.currentPropertyValue;
+    if (state == "DOTA_GAMERULES_STATE_POST_GAME" && matchDict[matchID]!=null) {
+        removeMatch(matchID);
+    }
+    else {
+    if (matchDict[matchID] != matchObject && state != "DOTA_GAMERULES_STATE_POST_GAME") {
+        addNewMatch(matchObject);
+    }
+    }
+}
+
+function addNewMatch(matchObject) {
+    console.log("adding match");
+    var matchID = matchObject.matchID;
+    if (matchDict[matchObject.matchID] == null) {
+        console.log("adding to DOM");
+        // Add to DOM
+         $('#matchSel').append('<option id ="'+matchID+'"value="'+matchID+'">'+matchID+'</option>');
+         //$("#matchSel").trigger("refresh");
+         $("#matchSel").selectmenu('refresh', true);
+         alert("New match available! "+matchID);
+    }
+    else {
+        // Update DOM
+    }
+    matchDict[matchObject.matchID] = matchObject;
+}
+
+function removeMatch(matchID) {
+    delete matchDict[matchID];
+    $("#"+matchID).remove();
+}
+
+// First-time visualisation setup
 
 function setupMatch() {
     getPlayers();
-    getObserverData();
-    getHealthData();
+  //  getObserverData();
+  //  getHealthData();
 }
 
 function getPlayers() {
            $.ajax({
-            url:"/users/getplayers",
+            url:"/users/getplayers?matchid="+selectedMatch,
             contentType: "application/json",
             success: function(response) {
                 console.log(response);
@@ -192,7 +265,7 @@ function getPlayers() {
 
 function getNames() {
      $.ajax({
-            url:"/users/getnames",
+            url:"/users/getnames?matchid="+selectedMatch,
             contentType: "application/json",
             success: function(response) {
                 console.log(response);
@@ -208,7 +281,7 @@ function getNames() {
 
 function getTeams() {
             $.ajax({
-            url:"/users/getteams",
+            url:"/users/getteams?matchid="+selectedMatch,
             contentType: "application/json",
             success: function(response) {
                 console.log(response);
@@ -227,7 +300,7 @@ function getInitialHeroPositions() {
     teamObject.heroes.forEach(function(hero){
         console.log("getting positions");
         $.ajax({
-            url:"/users/getinitialpositions?hero="+hero.heroID+"&limit="+movementsStored,
+            url:"/users/getinitialpositions?hero="+hero.heroID+"&limit="+movementsStored+"&matchid="+selectedMatch,
             contentType: "application/json",
             //data: {id: "SomeID"},
             success: function(response) {
@@ -245,7 +318,7 @@ function getInitialHeroPositions() {
             getObserverData();
             getHealthData();
             drawPlayers();
-loopingInterval = setInterval(updateLoop, loopTime);
+            visualisationLoopingInterval = setInterval(visualisationUpdateLoop, visualisationLoopTime);
 }
 
 function createPlayers(playerObject){
@@ -265,6 +338,7 @@ function assignNames (nameObject) {
         heroList.forEach(function heroName(hero){
             if (nameObject.entityID == hero.heroID) {
                 hero.name = nameObject.currentPropertyValue;
+                loadHeroIcon(hero.name);
             }
         });
     }
@@ -280,6 +354,16 @@ function assignNames (nameObject) {
         teamList.push(team);
         teamDict[team.name]=team;
     } 
+}
+
+function loadHeroIcon(heroName) {
+    var iconObj = new Image();
+    var heroImageSrc = heroName.replace("npc_dota_hero_", "");
+    heroImageSrc+=".png";
+    console.log(heroImageSrc);
+    iconObj.src = "minimapicons/"+heroImageSrc;
+    heroIconDict[heroName] = iconObj;
+   // iconObj.src = ""
 }
 
 function assignTeams (teamObject) {
@@ -300,7 +384,7 @@ function assignTeams (teamObject) {
 
 // End of first time setup
 
-function updateLoop() {
+function visualisationUpdateLoop() {
     getHeroPositions();
     generateRadiantControlHeatmap();
     generateDireControlHeatmap();
@@ -330,7 +414,7 @@ function getHeroPositions() {
         else {
             console.log ("Wrong number of heroes: "+heroList.length);
         }
-            var newurl = requrl+"&time="+currentGameTime+"&limit="+maxQueryResponse;
+            var newurl = requrl+"&time="+currentGameTime+"&limit="+maxQueryResponse+"&matchid="+selectedMatch;
             requrl = newurl;
         $.ajax({
             url:requrl,
@@ -370,7 +454,7 @@ function logMovement(movementData) {
 
 function getObserverData() {
     $.ajax({
-        url:"/users/getobserverdata",
+        url:"/users/getobserverdata?matchid="+selectedMatch,
         contentType: "application/json",
         success: function(response) {
             console.log(response);
@@ -415,7 +499,7 @@ function updateObservers(observerData) {
 
 function getHealthData() {
     $.ajax({
-        url:"/users/gethealthdata",
+        url:"/users/gethealthdata?matchid="+selectedMatch,
         contentType: "application/json",
         success: function(response) {
             console.log(response);
@@ -441,13 +525,6 @@ function assignHealthData(data) {
 }
 
 
-
-//
-function addNewMatch(matchID) {
-    $("#selector").append('<option value="'+matchID+'">'+matchID+'</option>');
-}
-//
-
 function generateRadiantControlHeatmap() {
 
 if (radiantHeatmap == null){
@@ -458,12 +535,12 @@ radiantHeatmap = h337.create(radiantHeatmapConfig);
     var positionDataArray = [];
     team.heroes.forEach(function(hero){
         hero.positions.forEach(function(position){
-            var xPos = convertToRange(position.xPos, [(-7500), 7500], [0, 500]);
-            var yPos = convertToRange(position.yPos, [(-7500), 7500], [0, 500]);
+            var xPos = convertToRange(position.xPos, [(-7500), 7500], [0, visualisationSize]);
+            var yPos = convertToRange(position.yPos, [(-7500), 7500], [0, visualisationSize]);
             var weightVal = 1;
             var point = {
                 x: xPos,
-                y: 500-yPos,
+                y: visualisationSize-yPos,
                 value: weightVal
             };
             positionDataArray.push(point);
@@ -491,12 +568,12 @@ function generateDireControlHeatmap() {
     var positionDataArray = [];
     team.heroes.forEach(function(hero){
         hero.positions.forEach(function(position){
-            var xPos = convertToRange(position.xPos, [(-7500), 7500], [0, 500]);
-            var yPos = convertToRange(position.yPos, [(-7500), 7500], [0, 500]);
+            var xPos = convertToRange(position.xPos, [(-7500), 7500], [0, visualisationSize]);
+            var yPos = convertToRange(position.yPos, [(-7500), 7500], [0, visualisationSize]);
             var weightVal = 1;
             var point = {
                 x: xPos,
-                y: 500-yPos,
+                y: visualisationSize-yPos,
                 value: weightVal
             };
             positionDataArray.push(point);
@@ -519,8 +596,10 @@ function drawPlayers () {
     teamList.forEach(function(team){
         team.heroes.forEach(function(hero){
             if (hero.positions[hero.positions.length-1]!=null){
-            var xPos = convertToRange(hero.positions[hero.positions.length-1].xPos, [(-7500), 7500], [0, 500]);
-            var yPos = convertToRange(hero.positions[hero.positions.length-1].yPos, [(-7500), 7500], [0, 500]);
+            var xPos = convertToRange(hero.positions[hero.positions.length-1].xPos, [(-7500), 7500], [0, canvas.width]);
+            var yPos = convertToRange(hero.positions[hero.positions.length-1].yPos, [(-7500), 7500], [0, canvas.height]);
+            console.log(xPos);
+            console.log(yPos);
             if (team.name=="dire") {
                 ctx.fillStyle = "#FF0000";
             }
@@ -529,16 +608,26 @@ function drawPlayers () {
             }
 
             var healthPortion = (hero.health/hero.maxHealth)*2;
-           
+            
+            if(hero.health>0) {
             ctx.beginPath();
-            ctx.arc(xPos,500-yPos,20,(-0.5)*Math.PI,(healthPortion-0.5)*Math.PI);
-            ctx.lineTo(xPos, 500-yPos);
+            ctx.arc(xPos,canvas.height-yPos,20,(-0.5)*Math.PI,(healthPortion-0.5)*Math.PI);
+            ctx.lineTo(xPos, canvas.height-yPos);
+            ctx.closePath();
+            ctx.stroke();
             ctx.fill();
+            }
 
             ctx.beginPath();
-            ctx.arc(xPos,500-yPos,15,0,2*Math.PI);
-            ctx.fillStyle = "#000000"; 
+            ctx.arc(xPos,canvas.height-yPos,16,0,2*Math.PI);
+            ctx.closePath();
+            ctx.fillStyle = "rgba(0, 0, 0, 0.5)"; 
             ctx.fill();
+
+            var iconWidth = 35;
+            var iconHeight = 35;
+            ctx.drawImage(heroIconDict[hero.name], xPos-iconWidth/2, canvas.height-yPos-iconHeight/2, iconWidth, iconHeight);
+
             }
         });
     });
@@ -550,8 +639,8 @@ function drawPlayers () {
     for (var observer in observerDict) {
         var ward = observerDict[observer];
         if (ward.xPos != null && ward.yPos != null){
-        var xPos = convertToRange(ward.xPos, [(-7500), 7500], [0, 500]);
-        var yPos = convertToRange(ward.yPos, [(-7500), 7500], [0, 500]);
+        var xPos = convertToRange(ward.xPos, [(-7500), 7500], [0, visualisationSize]);
+        var yPos = convertToRange(ward.yPos, [(-7500), 7500], [0, visualisationSize]);
         console.log(xPos);
         console.log(yPos);
         if (ward.hero != null){
@@ -562,7 +651,7 @@ function drawPlayers () {
                 ctx.fillStyle = "blue";
             }
             ctx.beginPath();
-            ctx.arc(xPos,500-yPos,20,0,2*Math.PI);
+            ctx.arc(xPos,visualisationSize-yPos,20,0,2*Math.PI);
             //ctx.stroke();
             ctx.fill();
         }

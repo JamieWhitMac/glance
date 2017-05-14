@@ -2,30 +2,20 @@
 <html>
     <head>
         <link rel="stylesheet" href="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css" />
+        <link rel="stylesheet" type="text/css" href="style.css">
         <script src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
         <script src="http://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.js"></script>
         <script src="heatmap.js"></script>
         <script src="scripts.js"></script>
     </head>
-    <style>
-        .visualisation {width: 500px; height: 500px; padding: 0px; border: 0px; position: relative}
-        #direHeatmap {width: 500px; height: 500px; padding: 0px; border: 0px; position: absolute !important}
-        #radiantHeatmap {width: 500px; height: 500px; padding: 0px; border: 0px; position: absolute !important}
-        #canvas {width: 100%; height: 100%; padding: 0px; border: 1px solid #F00000; z-index: 20; position: absolute}
-        #mapimage {width: 100%; height: 100%; border: 0px; position: absolute; top:0px; left: 0px; right: 0px; bottom: 0px; position: absolute }
-    </style>
     <body>
         <div data-role="page" id="matchSelector">
             <div data-role="main" class = "ui-content">
                 <h2>Glance for Dota</h2>
                 <p>Please select a match:</p>
                 <div class="ui-field-contain">
-                    <select name="select-custom-21" id="selector" data-native-menu="false">
-                        <option value="choose-one" data-placeholder="true">Choose one...</option>
-                        <option value="1">The 1st Option</option>
-                        <option value="2">The 2nd Option</option>
-                        <option value="3">The 3rd Option</option>
-                        <option value="4">The 4th Option</option>
+                    <select class = "selector" name="select-custom-21" id="matchSel" data-native-menu="false">
+                        <option id="nullOption"value="choose-one" data-placeholder="true">Choose one...</option>
                     </select>
 
                 </div>
@@ -38,8 +28,8 @@
 
                 <p>Visualisation here.</p>
 
-                <div class = "visualisation">
-                <img src="dota2map.jpg" id = "mapimage"></img>
+                <div id = "visualisationDiv">
+                <img src="dota2map4.jpg" id = "mapimage"></img>
                   <div class="heatmap" id = "radiantHeatmap">
                     </div>
                     <div class="heatmap2" id = "direHeatmap">
@@ -47,14 +37,11 @@
                     <canvas id = "canvas" width = "500" height = "500"></canvas>
                   </div>
 
-                <button id = "playersbutton">Get Players</button>
-                <button id = "namesbutton">Get Names</button>
-                <button id = "teamsbutton">Get Teams</button>
-                <button id = "getpositionsbutton">Get Positions</button>
-                <button id = "heatmapbutton">Create Heatmap</button>
-                <button id = "drawheroesbutton">Draw Heroes</button>
-                <button id = "updatebutton">Update</button>
-                <button id = "databutton">Get Data</button>
+                <ul id = "eventStream" data-role="listview" class = "ui-corner-all">
+                    <li>List Item</li>
+                    <li>List Item</li>
+                    <li>List Item</li>
+                </ul>
             </div>
         </div>
     </body>

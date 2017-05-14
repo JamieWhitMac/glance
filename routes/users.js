@@ -6,7 +6,8 @@ const User = require("../models/user");
 // Get position data
 router.get("/getpositiondata", (req, res, next) => {
    // res.send("DATA");
-    User.getData("Position", (err, data) => {
+   var matchID = req.query.matchid;
+    User.getData("Position", matchID, (err, data) => {
         if (err) throw err;
         if (data) {
          console.log("data here");
@@ -22,7 +23,8 @@ router.get("/getpositiondata", (req, res, next) => {
 
 // Get names
 router.get("/getnames", (req, res, next) => {
-    User.getData("Name", (err, data) => {
+    var matchID = req.query.matchid;
+    User.getData("Name", matchID, (err, data) => {
         if (err) throw err;
         if (data) {
          console.log("Names here");
@@ -37,7 +39,8 @@ router.get("/getnames", (req, res, next) => {
 
 // Get teams
 router.get("/getteams", (req, res, next) => {
-    User.getData("Team", (err, data) => {
+    var matchID = req.query.matchid;
+    User.getData("Team", matchID, (err, data) => {
         if (err) throw err;
         if (data) {
          console.log("Teams here");
@@ -52,7 +55,8 @@ router.get("/getteams", (req, res, next) => {
 
 // Get players
     router.get("/getplayers", (req, res, next) => {
-    User.getData("Hero", (err, data) => {
+        var matchID = req.query.matchid;
+    User.getData("Hero", matchID, (err, data) => {
         if (err) throw err;
         if (data) {
          console.log("Players here");
@@ -67,7 +71,8 @@ router.get("/getteams", (req, res, next) => {
 
 // Get heroes
 router.get("/getheroes", (req, res, next) => {
-    User.getDistinct("currentPropertyValue", "Hero", (err, data) => {
+    var matchID = req.query.matchid;
+    User.getDistinct("currentPropertyValue", "Hero", matchID, (err, data) => {
         if (err) throw err;
         if (data) {
          console.log("Heroes here");
@@ -82,7 +87,8 @@ router.get("/getheroes", (req, res, next) => {
 
 // Get initial positions
 router.get("/getinitialpositions", (req, res, next) => {
-        User.getLatestDataAboutEntity(req.query.hero, "Position", req.query.limit, 0, (err, data) => {
+    var matchID = req.query.matchid;
+        User.getLatestDataAboutEntity(req.query.hero, "Position", req.query.limit, 0, matchID, (err, data) => {
         if (err) throw err;
         if (data) {
          console.log("Positions here");
@@ -112,7 +118,9 @@ router.get("/getlatestpositions", (req, res, next) => {
 
     console.log(heroArray);
 
-    User.getLatestDataAboutEntity(heroArray, "Position", req.query.limit, req.query.time, (err, data) => {
+    var matchID = req.query.matchid;
+
+    User.getLatestDataAboutEntity(heroArray, "Position", req.query.limit, req.query.time, matchID, (err, data) => {
         if (err) throw err;
         if (data) {
          console.log("Positions here");
@@ -128,7 +136,8 @@ router.get("/getlatestpositions", (req, res, next) => {
 // Get observer data
 
     router.get("/getobserverdata", (req, res, next) => {
-    User.getByEntityType("Nucleus.DataSources.Dota2.ObserverWardEntity", (err, data) => {
+        var matchID = req.query.matchid;
+    User.getByEntityType("Nucleus.DataSources.Dota2.ObserverWardEntity", matchID, (err, data) => {
         if (err) throw err;
         if (data) {
          console.log("Observers here");
@@ -144,7 +153,8 @@ router.get("/getlatestpositions", (req, res, next) => {
 // Get Health data
 
 router.get("/gethealthdata", (req, res, next) => {
-    User.getByProperties("propertyName", "propertyName", "CurrentHealth", "CurrentMaxHealth", (err, data) => {
+    var matchID = req.query.matchid;
+    User.getByProperties("propertyName", "propertyName", "CurrentHealth", "CurrentMaxHealth", matchID, (err, data) => {
         if (err) throw err;
         if (data) {
          console.log("Health data here");
@@ -165,7 +175,8 @@ router.get("/gethealthdata", (req, res, next) => {
 
 // Get match IDs
 router.get("/getmatches", (req, res, next) => {
-    User.getMatches("Position", (err, data) => {
+    var matchID = req.query.matchid;
+    User.getMatches((err, data) => {
         if (err) throw err;
         if (data) {
          console.log("Matches here");
