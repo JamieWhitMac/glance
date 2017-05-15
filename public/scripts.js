@@ -48,6 +48,8 @@ var eventFeed;
 
 var heatmapFunctionsDict;
 
+var observerIcon;
+
 $( document ).ready(function() {
 
 canvas = document.getElementById("canvas");
@@ -204,6 +206,8 @@ ctx = canvas.getContext("2d");
     });
 
     //
+
+    loadObserverIcon();
 
 $("#matchSel").change(function() {
     selectedMatch = this.value;
@@ -419,6 +423,13 @@ function loadHeroIcon(heroName) {
  //   console.log(heroImageSrc);
     iconObj.src = "minimapicons/"+heroImageSrc;
     heroIconDict[heroName] = iconObj;
+   // iconObj.src = ""
+}
+
+function loadObserverIcon() {
+    var iconObj = new Image();
+    iconObj.src = "minimapicons/observerWard.png";
+    observerIcon = iconObj;
    // iconObj.src = ""
 }
 
@@ -827,7 +838,7 @@ function changeHeatmap(value) {
 
 function drawPlayers () {
     ctx.clearRect(0, 0, canvas.width, canvas.height)
-   // drawObservers();
+    drawObservers();
     teamList.forEach(function(team){
         team.heroes.forEach(function(hero){
             if (hero.positions[hero.positions.length-1]!=null){
@@ -888,10 +899,14 @@ function drawPlayers () {
             }
             
             ctx.beginPath();
-            ctx.arc(xPos,canvas.height-yPos,convertToRange(1600, [(0), 15000], [0, canvas.width]),0,2*Math.PI);
+            ctx.arc(xPos,canvas.height-yPos,convertToRange(1000, [(0), 15000], [0, canvas.width]),0,2*Math.PI);
             console.log(wardRadius);
             //ctx.stroke();
             ctx.fill();
+
+            var iconWidth = 35;
+            var iconHeight = 35;
+            ctx.drawImage(observerIcon, xPos-iconWidth/2, canvas.height-yPos-iconHeight/2, iconWidth, iconHeight);
         }
         }
     }
