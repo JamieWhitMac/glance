@@ -10,6 +10,10 @@ var teamDict;
 var observerDict;
 var heroIconDict;
 
+var deadObserverDict;
+
+var eventBuffer;
+
 var movementsStored;
 var maxQueryResponse;
 var currentGameTime;
@@ -27,8 +31,13 @@ var direHeatmapConfig;
 
 var canvas;
 var ctx;
+var fps;
 
 var visualisationSize;
+
+var wardRadius;
+
+var eventFeed;
 
 $( document ).ready(function() {
 
@@ -41,15 +50,18 @@ ctx = canvas.getContext("2d");
     heroList = [];
     teamList = [];
 
+    eventBuffer = [];
+
     matchDict = {};
 
     heroDict = {};
     teamDict = {};
     observerDict = {};
+    deadObserverDict = {};
 
     heroIconDict = {};
 
-    movementsStored = 50;
+    movementsStored = 125;
     maxQueryResponse = 500;
 
     visualisationLoopTime = 2000;
@@ -58,9 +70,9 @@ ctx = canvas.getContext("2d");
     radiantHeatmapConfig = {
         container: document.getElementById("radiantHeatmap"),
         gradient: {
-    ".5": "#1fafd3",
-    ".8": "#42d1f4",
-    ".95": "#96eaff"
+    ".5": "#61a57a",
+    ".8": "#48c977",
+    ".95": "#26f271"
         }
     }
 
@@ -74,6 +86,12 @@ ctx = canvas.getContext("2d");
     }
 
     visualisationSize = $("#visualisationDiv").height();
+
+    var v = 1600;
+
+    wardRadius = convertFromGameUnits(v);
+
+    eventFeed = $("#eventBuffer");
 
     // Debugging buttons
 
@@ -163,7 +181,7 @@ ctx = canvas.getContext("2d");
 $("#matchSel").change(function() {
     selectedMatch = this.value;
    // $("#selector").append('<option value="4">The 4th Option</option>');
-   console.log(selectedMatch);
+  // console.log(selectedMatch);
 });
 
 // When leaving the Match Selector page
@@ -178,7 +196,7 @@ $(document).on("pagebeforehide","#matchSelector",function(){
 $(document).on("pagebeforehide","#glancevisualisation",function(){
     // Refresh everything
     matchSelectUpdateInterval = setInterval(selectMatchUpdateLoop, matchSelectLoopTime);
-    console.log("start interval");
+   // console.log("start interval");
 //setupMatch();
   //console.log(selectedMatch);
  // var optionSelected = $("#select-custom-21")
@@ -198,7 +216,7 @@ function selectMatchUpdateLoop() {
             url:"/users/getmatches",
             contentType: "application/json",
             success: function(response) {
-                console.log(response);
+               // console.log(response);
                 response.forEach(sortMatches);
             }
         });
@@ -218,10 +236,10 @@ function sortMatches(matchObject) {
 }
 
 function addNewMatch(matchObject) {
-    console.log("adding match");
+  //  console.log("adding match");
     var matchID = matchObject.matchID;
     if (matchDict[matchObject.matchID] == null) {
-        console.log("adding to DOM");
+     //   console.log("adding to DOM");
         // Add to DOM
          $('#matchSel').append('<option id ="'+matchID+'"value="'+matchID+'">'+matchID+'</option>');
          //$("#matchSel").trigger("refresh");
@@ -252,7 +270,7 @@ function getPlayers() {
             url:"/users/getplayers?matchid="+selectedMatch,
             contentType: "application/json",
             success: function(response) {
-                console.log(response);
+          //      console.log(response);
                 response.forEach(createPlayers);
                 playerList.forEach(readPlayers);
 
@@ -268,7 +286,7 @@ function getNames() {
             url:"/users/getnames?matchid="+selectedMatch,
             contentType: "application/json",
             success: function(response) {
-                console.log(response);
+           //     console.log(response);
                 response.forEach(assignNames);
                 heroList.forEach(readHeroes);
 
@@ -284,7 +302,7 @@ function getTeams() {
             url:"/users/getteams?matchid="+selectedMatch,
             contentType: "application/json",
             success: function(response) {
-                console.log(response);
+           //     console.log(response);
                 response.forEach(assignTeams);
                 teamList.forEach(readTeams);
 
@@ -298,14 +316,14 @@ function getTeams() {
 function getInitialHeroPositions() {
     teamList.forEach(function(teamObject) {
     teamObject.heroes.forEach(function(hero){
-        console.log("getting positions");
+    //    console.log("getting positions");
         $.ajax({
             url:"/users/getinitialpositions?hero="+hero.heroID+"&limit="+movementsStored+"&matchid="+selectedMatch,
             contentType: "application/json",
             //data: {id: "SomeID"},
             success: function(response) {
                 response.reverse();
-                console.log(response);
+           //     console.log(response);
                 response.forEach(function(movement) {
             logMovement(movement);
             });
@@ -317,6 +335,7 @@ function getInitialHeroPositions() {
             generateDireControlHeatmap();
             getObserverData();
             getHealthData();
+
             drawPlayers();
             visualisationLoopingInterval = setInterval(visualisationUpdateLoop, visualisationLoopTime);
 }
@@ -334,7 +353,7 @@ function createPlayers(playerObject){
 
 function assignNames (nameObject) {
     if (nameObject.entityType=="Nucleus.DataSources.Dota2.HeroEntity") {
-        console.log(nameObject.entityType);
+     //   console.log(nameObject.entityType);
         heroList.forEach(function heroName(hero){
             if (nameObject.entityID == hero.heroID) {
                 hero.name = nameObject.currentPropertyValue;
@@ -360,7 +379,7 @@ function loadHeroIcon(heroName) {
     var iconObj = new Image();
     var heroImageSrc = heroName.replace("npc_dota_hero_", "");
     heroImageSrc+=".png";
-    console.log(heroImageSrc);
+ //   console.log(heroImageSrc);
     iconObj.src = "minimapicons/"+heroImageSrc;
     heroIconDict[heroName] = iconObj;
    // iconObj.src = ""
@@ -391,7 +410,7 @@ function visualisationUpdateLoop() {
     getObserverData();
     getHealthData();
     drawPlayers();
-   console.log("loop!");
+ //  console.log("loop!");
 }
 
 function getHeroPositions() {
@@ -407,12 +426,12 @@ function getHeroPositions() {
                 var newurl =  requrl+"&hero"+heroNumber+"="+hero.heroID;
                 requrl = newurl;
             }
-            console.log(requrl);
+         //   console.log(requrl);
             heroNumber++;
             });
         }
         else {
-            console.log ("Wrong number of heroes: "+heroList.length);
+        //    console.log ("Wrong number of heroes: "+heroList.length);
         }
             var newurl = requrl+"&time="+currentGameTime+"&limit="+maxQueryResponse+"&matchid="+selectedMatch;
             requrl = newurl;
@@ -449,7 +468,7 @@ function logMovement(movementData) {
      if (heroDict[movementData.entityID].positions.length>movementsStored){
         heroDict[movementData.entityID].positions.shift();
      }
-     console.log("logged");
+ //    console.log("logged");
 }
 
 function getObserverData() {
@@ -457,7 +476,7 @@ function getObserverData() {
         url:"/users/getobserverdata?matchid="+selectedMatch,
         contentType: "application/json",
         success: function(response) {
-            console.log(response);
+        //    console.log(response);
             updateObservers(response);
             }
         });
@@ -466,35 +485,57 @@ function getObserverData() {
 function updateObservers(observerData) {
     observerData.forEach(function(observerEntry) {
         if (observerEntry.propertyName == "WardPlacedEvent") {
-            if (observerDict[observerEntry.entityID] == null) {
+            if (observerDict[observerEntry.entityID] == null && deadObserverDict[observerEntry.entityID] == null) {
                 var splitString = observerEntry.currentPropertyValue.split(",");
                 var placedBy = splitString[0];
                 var xPos = parseInt(splitString[1]);
                 var yPos = parseInt(splitString[2]);
 
                 var newObserver = new Observer(observerEntry.entityID, heroDict[placedBy.toString()]);
-                console.log(heroDict[placedBy.toString()]);
-                console.log(newObserver.hero);
+        //        console.log(heroDict[placedBy.toString()]);
+        //        console.log(newObserver.hero);
                 newObserver.xPos = xPos;
                 newObserver.yPos = yPos;
                 observerDict[observerEntry.entityID] = newObserver;
+
+                var observerPlacedEvent = new GameEvent (newObserver.hero, "observerPlaced", xPos, yPos, observerEntry.gameTime);
+                console.log(observerPlacedEvent);
+                eventBuffer.push(observerPlacedEvent);
+                addToEventFeed(observerPlacedEvent);
             }
         }
 
         if (observerEntry.propertyName == "WardExpiredEvent") {
             if (observerDict[observerEntry.entityID] != null) {
+                var observer = observerDict[observerEntry.entityID];
+                var placedBy = observer.hero; 
+                var observerExpiredEvent = new GameEvent(placedBy, "observerExpired", observer.xPos,observer.yPos, observerEntry.gameTime);
+                console.log(observerExpiredEvent);
+                eventBuffer.push(observerExpiredEvent);
+                addToEventFeed(observerExpiredEvent);
+
+                deadObserverDict[observer.observerID] = observerEntry.gameTime;
                 delete observerDict[observerEntry.entityID];
             }
         }
 
         if (observerEntry.propertyName == "WardDestroyedEvent") {
             if (observerDict[observerEntry.entityID] != null) {
+                var observer = observerDict[observerEntry.entityID];
+                var placedBy = observer.hero; 
+                var observerDestroyedEvent = new GameEvent(placedBy, "observerDestroyed", observer.xPos,observer.yPos, observerEntry.gameTime);
+                observerDestroyedEvent.heroResponsible = heroDict[observerEntry.currentPropertyValue];
+                console.log(observerDestroyedEvent);
+                eventBuffer.push(observerDestroyedEvent);
+                addToEventFeed(observerDestroyedEvent);
+
+                deadObserverDict[observer.observerID] = observerEntry.gameTime;
                 delete observerDict[observerEntry.entityID];
             }
         }
     });
 
-    console.log(observerDict);
+  //  console.log(observerDict);
 }
 
 function getHealthData() {
@@ -502,7 +543,7 @@ function getHealthData() {
         url:"/users/gethealthdata?matchid="+selectedMatch,
         contentType: "application/json",
         success: function(response) {
-            console.log(response);
+       //     console.log(response);
             assignHealthData(response);
             }
         });
@@ -513,12 +554,33 @@ function assignHealthData(data) {
         var splitString = healthObject.entityID.split(",");
         var heroID = splitString[0];
         var healthProperty = splitString[1];
+        var healthValue = healthObject.currentPropertyValue;
+
         if (heroDict[heroID]!=null){
+            var hero = (heroDict[heroID]);
         if(healthProperty == "CurrentMaxHealth") {
-            heroDict[heroID].maxHealth = healthObject.currentPropertyValue;
+            hero.maxHealth = healthValue;
         }
         if(healthProperty == "CurrentHealth") {
-            heroDict[heroID].health = healthObject.currentPropertyValue;
+            hero.health = healthValue;
+            if (healthValue == 0 && hero.isAlive == true) {
+                hero.isAlive = false;
+               console.log(hero.name+ " is dead");
+               var deathEvent = new GameEvent (hero, "death", hero.positions[hero.positions.length-1].xPos, hero.positions[hero.positions.length-1].yPos, currentGameTime);
+               console.log(deathEvent);
+               addToEventFeed(deathEvent);
+               eventBuffer.push(deathEvent);
+            }
+            else {
+                if (!hero.isAlive && healthValue != 0) {
+                    hero.isAlive = true;
+                    console.log(hero.name+ " is alive again");
+                    var respawnEvent = new GameEvent (hero, "respawn", hero.positions[hero.positions.length-1].xPos, hero.positions[hero.positions.length-1].yPos, currentGameTime);
+                    console.log(respawnEvent);
+                    eventBuffer.push(respawnEvent);
+                    addToEventFeed(respawnEvent);
+                }
+            }
         }
         }
     });
@@ -531,7 +593,7 @@ if (radiantHeatmap == null){
 radiantHeatmap = h337.create(radiantHeatmapConfig);
 }
     var team = teamDict["radiant"];
-    console.log(team.name);
+    //console.log(team.name);
     var positionDataArray = [];
     team.heroes.forEach(function(hero){
         hero.positions.forEach(function(position){
@@ -554,8 +616,8 @@ radiantHeatmap = h337.create(radiantHeatmapConfig);
     };
 
     radiantHeatmap.setData(data);
-    console.log(data);
-    console.log("Heatmap created.");
+   // console.log(data);
+   // console.log("Heatmap created.");
 }
 
 function generateDireControlHeatmap() {
@@ -564,7 +626,7 @@ function generateDireControlHeatmap() {
     }
 
     var team = teamDict["dire"];
-    console.log(team.name);
+   // console.log(team.name);
     var positionDataArray = [];
     team.heroes.forEach(function(hero){
         hero.positions.forEach(function(position){
@@ -587,24 +649,25 @@ function generateDireControlHeatmap() {
     };
 
     direHeatmap.setData(data);
-    console.log(data);
-    console.log("Heatmap created.");
+  //  console.log(data);
+  //  console.log("Heatmap created.");
 }
 
 function drawPlayers () {
     ctx.clearRect(0, 0, canvas.width, canvas.height)
+   // drawObservers();
     teamList.forEach(function(team){
         team.heroes.forEach(function(hero){
             if (hero.positions[hero.positions.length-1]!=null){
             var xPos = convertToRange(hero.positions[hero.positions.length-1].xPos, [(-7500), 7500], [0, canvas.width]);
             var yPos = convertToRange(hero.positions[hero.positions.length-1].yPos, [(-7500), 7500], [0, canvas.height]);
-            console.log(xPos);
-            console.log(yPos);
+          //  console.log(xPos);
+          //  console.log(yPos);
             if (team.name=="dire") {
                 ctx.fillStyle = "#FF0000";
             }
             else {
-                ctx.fillStyle = "blue";
+                ctx.fillStyle = "#48f442";
             }
 
             var healthPortion = (hero.health/hero.maxHealth)*2;
@@ -631,33 +694,63 @@ function drawPlayers () {
             }
         });
     });
-
-   // drawObservers();
 }
 
    function drawObservers () {
     for (var observer in observerDict) {
         var ward = observerDict[observer];
         if (ward.xPos != null && ward.yPos != null){
-        var xPos = convertToRange(ward.xPos, [(-7500), 7500], [0, visualisationSize]);
-        var yPos = convertToRange(ward.yPos, [(-7500), 7500], [0, visualisationSize]);
-        console.log(xPos);
-        console.log(yPos);
+     //       var xPos = convertFromGameUnits(ward.xPos);
+     //       var yPos = convertFromGameUnits(ward.yPos);
+
+        var xPos = convertToRange(ward.xPos, [(-7500), 7500], [0, canvas.width]);
+        var yPos = convertToRange(ward.yPos, [(-7500), 7500], [0, canvas.width]);
+       // console.log(xPos);
+       // console.log(yPos);
         if (ward.hero != null){
         if (ward.hero.team.name=="dire") {
-                ctx.fillStyle = "#FF0000";
+                ctx.fillStyle = "rgba(169, 72, 79, 0.5)";
             }
             else {
-                ctx.fillStyle = "blue";
+                ctx.fillStyle = "rgba(75, 170, 73, 0.5)";
             }
+            
             ctx.beginPath();
-            ctx.arc(xPos,visualisationSize-yPos,20,0,2*Math.PI);
+            ctx.arc(xPos,canvas.height-yPos,convertToRange(1600, [(0), 15000], [0, canvas.width]),0,2*Math.PI);
+            console.log(wardRadius);
             //ctx.stroke();
             ctx.fill();
         }
         }
     }
+}
+
+function addToEventFeed (gEvent) {
+    var hero = gEvent.hero;
+    var team = hero.team;
+    if(gEvent.type == "death"){
+            var listItem = "<li><span class ='"+team.name+"'>"+hero.player.name+"</span> has died.</li>"
     }
+
+    if (gEvent.type == "respawn") {
+            var listItem = "<li><span class ='"+team.name+"'>"+hero.player.name+"</span> has returned to battle.</li>" 
+    }
+
+    if (gEvent.type == "observerPlaced") {
+            var listItem = "<li><span class ='"+team.name+"'>"+hero.player.name+"</span> has placed an observer ward.</li>"
+    }
+
+    if (gEvent.type == "observerExpired") {
+        var listItem = "<li><span class ='"+team.name+"'>"+hero.player.name+"\'s</span> observer ward has expired.</li>"
+    }
+
+    if (gEvent.type == "observerDestroyed") {
+        var listItem = "<li><span class ='"+gEvent.heroResponsible.team.name+"'>"+gEvent.heroResponsible.player.name+"</span> has destroyed <span class = '"+team.name+"'>"+hero.player.name+"\'s</span> observer ward.</li>"
+    }
+
+    eventFeed.prepend(listItem);
+    eventFeed.listview('refresh', true);
+}
 
 // Object constructors
 
@@ -669,6 +762,7 @@ function Hero(heroID, player) {
     this.heroID = heroID;
     this.player = player;
     this.positions = [];
+    this.isAlive = true;
 }
 
 function Team(teamID, name) {
@@ -682,7 +776,21 @@ function Observer(observerID, hero) {
     this.hero = hero;
 }
 
+function GameEvent(hero, type, xPos, yPos, gameTime) {
+    this.hero = hero;
+    this.type = type;
+    this.location = [xPos, yPos];
+    this.gameTime = gameTime;
+}
+
 // Helper functions
+
+function convertFromGameUnits(value) {
+    console.log("initial value: ")+value;
+    var newValue = convertToRange(value, [(-7500), 7500], [0, visualisationSize]);
+    console.log("new value: ")+newValue;
+    return newValue;
+}
 
 // http://stackoverflow.com/questions/10756313/javascript-jquery-map-a-range-of-numbers-to-another-range-of-numbers
 function convertToRange(value, srcRange, dstRange){
@@ -701,18 +809,18 @@ function convertToRange(value, srcRange, dstRange){
 // Reading functions
 
 function readPlayers (playerObj) {
-    console.log(playerObj.playerID);
+   // console.log(playerObj.playerID);
 }
 
 function readHeroes (heroObj) {
-    console.log(heroObj.heroID+" corresponds to "+heroObj.player.playerID+" "+heroObj.name+" "+heroObj.player.name);
+  //  console.log(heroObj.heroID+" corresponds to "+heroObj.player.playerID+" "+heroObj.name+" "+heroObj.player.name);
 }
 
 function readTeams (teamObj) {
     var name = teamObj.name;
     var list = teamObj.heroes;
-    console.log("Team "+name+" consists of...");
+   // console.log("Team "+name+" consists of...");
     list.forEach(function(hero) {
-        console.log(hero.player.name+", aka "+hero.heroID);
+      //  console.log(hero.player.name+", aka "+hero.heroID);
     });
 }
