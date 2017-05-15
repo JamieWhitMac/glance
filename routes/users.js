@@ -156,7 +156,7 @@ router.get("/getlatestgoldevents", (req, res, next) => {
         if (err) throw err;
         if (data) {
          console.log("Gold here");
-         console.log(data);
+        // console.log(data);
          res.send(data);
         }
         if (!data) {

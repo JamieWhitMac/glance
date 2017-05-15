@@ -14,7 +14,7 @@
                 <h2>Glance for Dota</h2>
                 <p>Please select a match:</p>
                 <div class="ui-field-contain">
-                    <select class = "selector" name="select-custom-21" id="matchSel" data-native-menu="false">
+                    <select class = "selector" name="select-custom-1" id="matchSel" data-native-menu="false">
                         <option id="nullOption"value="choose-one" data-placeholder="true">Choose one...</option>
                     </select>
 
@@ -34,8 +34,17 @@
                     </div>
                     <div class="heatmap2" id = "direHeatmap">
                     </div>
+                    <div class="heatmap3" id = "radiantGoldHeatmap">
+                    </div>
+                    <div class="heatmap4" id = "direGoldHeatmap">
+                    </div>
                     <canvas id = "canvas" width = "500" height = "500"></canvas>
                   </div>
+                   <select class = "selector" name="select-custom-2" id="heatmapSelector" data-native-menu="false">
+                        <option id="controlHeatmap"value="control">Map Control</option>
+                        <option id="goldHeatmap"value="gold">Gold Collection</option>
+                        <option id="noHeatmap"value="off">Hide Heatmap</option>
+                    </select>
 
                 <ul id = "eventBuffer" data-role="listview" class = "ui-corner-all">
                     <li>List Item</li>

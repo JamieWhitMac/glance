@@ -24,10 +24,17 @@ var visualisationLoopTime;
 var matchSelectUpdateInterval;
 var matchSelectLoopTime;
 
-var radiantHeatmap;
-var direHeatmap;
-var radiantHeatmapConfig;
-var direHeatmapConfig;
+var radiantControlHeatmap;
+var direControlHeatmap;
+
+var radiantControlHeatmapConfig;
+var direControlHeatmapConfig;
+
+var radiantGoldHeatmap;
+var direGoldHeatmap;
+
+var radiantGoldHeatmapConfig;
+var direGoldHeatmapConfig;
 
 var canvas;
 var ctx;
@@ -38,6 +45,8 @@ var visualisationSize;
 var wardRadius;
 
 var eventFeed;
+
+var heatmapFunctionsDict;
 
 $( document ).ready(function() {
 
@@ -67,7 +76,25 @@ ctx = canvas.getContext("2d");
     visualisationLoopTime = 2000;
     matchSelectLoopTime = 3000;
 
-    radiantHeatmapConfig = {
+    radiantGoldHeatmapConfig = {
+        container: document.getElementById("radiantGoldHeatmap"),
+        gradient: {
+    ".5": "#46b72d",
+    ".8": "#b1e04c",
+    ".95": "#f2d530"
+        }
+    }
+
+    direGoldHeatmapConfig = {
+        container: document.getElementById("direGoldHeatmap"),
+        gradient: {
+            ".5": "#b72d2d",
+            ".8": "#f2a73e",
+            ".95": "#f2d530"
+        }
+    }
+
+    radiantControlHeatmapConfig = {
         container: document.getElementById("radiantHeatmap"),
         gradient: {
     ".5": "#61a57a",
@@ -76,7 +103,7 @@ ctx = canvas.getContext("2d");
         }
     }
 
-    direHeatmapConfig = {
+        direControlHeatmapConfig = {
         container: document.getElementById("direHeatmap"),
         gradient: {
             ".5": "#d81145",
@@ -180,6 +207,12 @@ ctx = canvas.getContext("2d");
 
 $("#matchSel").change(function() {
     selectedMatch = this.value;
+   // $("#selector").append('<option value="4">The 4th Option</option>');
+  // console.log(selectedMatch);
+});
+
+$("#heatmapSelector").change(function() {
+    changeHeatmap(this.value);
    // $("#selector").append('<option value="4">The 4th Option</option>');
   // console.log(selectedMatch);
 });
@@ -332,7 +365,11 @@ function getInitialHeroPositions() {
     });
 });
             generateRadiantControlHeatmap();
+            generateRadiantGoldHeatmap();
+            generateDireGoldHeatmap();
             generateDireControlHeatmap();
+            $("#radiantGoldHeatmap").hide();
+            $("#direGoldHeatmap").hide();
             getObserverData();
             getHealthData();
 
@@ -406,6 +443,8 @@ function assignTeams (teamObject) {
 function visualisationUpdateLoop() {
     getGoldEvents();
     getHeroPositions();
+    generateRadiantGoldHeatmap();
+    generateDireGoldHeatmap();
     generateRadiantControlHeatmap();
     generateDireControlHeatmap();
     getObserverData();
@@ -463,7 +502,6 @@ function logGoldEvent(goldEvent){
 heroList.forEach(function(hero) {
     if (hero.player.playerID == goldEvent.entityID) {
         hero.goldEvents.push(goldEarnedEvent);
-        console.log(goldEvent);
     }
 });
 }
@@ -640,8 +678,8 @@ function assignHealthData(data) {
 
 function generateRadiantControlHeatmap() {
 
-if (radiantHeatmap == null){
-radiantHeatmap = h337.create(radiantHeatmapConfig);
+if (radiantControlHeatmap == null){
+radiantControlHeatmap = h337.create(radiantControlHeatmapConfig);
 }
     var team = teamDict["radiant"];
     //console.log(team.name);
@@ -666,14 +704,12 @@ radiantHeatmap = h337.create(radiantHeatmapConfig);
         data: positionDataArray
     };
 
-    radiantHeatmap.setData(data);
-   // console.log(data);
-   // console.log("Heatmap created.");
+    radiantControlHeatmap.setData(data);
 }
 
 function generateDireControlHeatmap() {
-    if (direHeatmap == null) {
-        direHeatmap = h337.create(direHeatmapConfig);
+    if (direControlHeatmap == null) {
+        direControlHeatmap = h337.create(direControlHeatmapConfig);
     }
 
     var team = teamDict["dire"];
@@ -699,9 +735,94 @@ function generateDireControlHeatmap() {
         data: positionDataArray
     };
 
-    direHeatmap.setData(data);
+    direControlHeatmap.setData(data);
   //  console.log(data);
   //  console.log("Heatmap created.");
+}
+
+function generateRadiantGoldHeatmap() {
+if (radiantGoldHeatmap == null){
+radiantGoldHeatmap = h337.create(radiantGoldHeatmapConfig);
+}
+    var team = teamDict["radiant"];
+    //console.log(team.name);
+    var goldDataArray = [];
+    team.heroes.forEach(function(hero){
+        hero.goldEvents.forEach(function(goldEvent){
+            var xPos = convertToRange(goldEvent.xPos, [(-7500), 7500], [0, visualisationSize]);
+            var yPos = convertToRange(goldEvent.yPos, [(-7500), 7500], [0, visualisationSize]);
+            var weightVal = goldEvent.goldEarned;
+            var point = {
+                x: xPos,
+                y: visualisationSize-yPos,
+                value: weightVal
+            };
+            goldDataArray.push(point);
+        });
+    });
+
+    var data = {
+        min: 0,
+        max: 300,
+        data: goldDataArray
+    };
+
+    radiantGoldHeatmap.setData(data);
+}
+
+function generateDireGoldHeatmap() {
+if (direGoldHeatmap == null){
+direGoldHeatmap = h337.create(direGoldHeatmapConfig);
+}
+    var team = teamDict["dire"];
+    //console.log(team.name);
+    var goldDataArray = [];
+    team.heroes.forEach(function(hero){
+        hero.goldEvents.forEach(function(goldEvent){
+            var xPos = convertToRange(goldEvent.xPos, [(-7500), 7500], [0, visualisationSize]);
+            var yPos = convertToRange(goldEvent.yPos, [(-7500), 7500], [0, visualisationSize]);
+            var weightVal = goldEvent.goldEarned;
+            var point = {
+                x: xPos,
+                y: visualisationSize-yPos,
+                value: weightVal
+            };
+            goldDataArray.push(point);
+        });
+    });
+
+    var data = {
+        min: 0,
+        max: 300,
+        data: goldDataArray
+    };
+
+    direGoldHeatmap.setData(data);
+}
+
+function changeHeatmap(value) {
+    if (value == "control") {
+        $("#radiantGoldHeatmap").hide();
+        $("#direGoldHeatmap").hide();
+        $("#radiantHeatmap").show();
+        $("#direHeatmap").show();
+        console.log("control");
+    }
+    if (value == "gold"){
+             $("#radiantHeatmap").hide();
+        $("#direHeatmap").hide();
+        $("#radiantGoldHeatmap").show();
+        $("#direGoldHeatmap").show(); 
+        console.log("gold");
+    }
+
+    if (value == "off") {
+        $("#radiantGoldHeatmap").hide();
+        $("#direGoldHeatmap").hide();
+        $("#radiantHeatmap").hide();
+        $("#direHeatmap").hide();
+        console.log("hide");
+    }
 }
 
 function drawPlayers () {
