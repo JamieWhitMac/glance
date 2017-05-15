@@ -7,10 +7,10 @@ module.exports.getUserById = function(id, callback) {
 }
 
 module.exports.getData = function(name, matchID, callback) {
-    console.log(name);
+  //  console.log(name);
     //var data;
       const collection = mongoose.connection.collection(matchID);
-      console.log(collection.name);
+   //   console.log(collection.name);
       const query = {propertyName: name};
       var options = {
           "sort": [["_id","desc"],["entityID","desc"]]
@@ -22,18 +22,18 @@ module.exports.getData = function(name, matchID, callback) {
               throw err;
           }
           if (items) {
-              console.log(items);
+        //      console.log(items);
               callback(null, items);
           }
       });
 }
 
 module.exports.getLatestDataAboutEntity = function(entity, property, limit, time, matchID, callback) {
-    console.log(property);
+ //   console.log(property);
     //var data;
       const collection = mongoose.connection.collection(matchID);
-      console.log(collection.name);
-      console.log (entity);
+  //    console.log(collection.name);
+  //    console.log (entity);
       var query;
       var timeInt = parseInt(time);
       if (Array.isArray(entity)){
@@ -42,7 +42,7 @@ module.exports.getLatestDataAboutEntity = function(entity, property, limit, time
       else {
           query = {propertyName: property, entityID: entity}
       }
-      console.log(query);
+  //    console.log(query);
       var limitInt = parseInt(limit);
       var options = {
           "sort": [["_id","desc"],["entityID","desc"]],
@@ -55,7 +55,7 @@ module.exports.getLatestDataAboutEntity = function(entity, property, limit, time
               throw err;
           }
           if (items) {
-              console.log(items);
+      //        console.log(items);
               callback(null, items);
           }
       });
@@ -73,7 +73,7 @@ module.exports.getDistinct = function(field, property, matchID, callback){
               throw err;
           }
           if (items) {
-              console.log(items);
+    //          console.log(items);
               callback(null, items);
           }
       });
@@ -89,7 +89,7 @@ module.exports.getByEntityType = function(type, matchID, callback){
               throw err;
           }
           if (items) {
-              console.log(items);
+  //            console.log(items);
               callback(null, items);
           }
     });
@@ -98,7 +98,7 @@ module.exports.getByEntityType = function(type, matchID, callback){
 module.exports.getByProperties = function(field1, field2, value1, value2, matchID, callback) {
     const collection = mongoose.connection.collection(matchID);
     const query = {$or: [{propertyName : value1}, {propertyName : value2}]};
-    console.log(query);
+ //   console.log(query);
 
     collection.find(query).toArray(function(err, items){
         if(err) {
@@ -106,7 +106,7 @@ module.exports.getByProperties = function(field1, field2, value1, value2, matchI
             throw err;
         }
         if (items) {
-            console.log(items);
+    //        console.log(items);
             callback(null, items);
         }
     });
@@ -122,7 +122,7 @@ module.exports.getMatches = function(callback) {
             throw err;
         }
         if (items) {
-            console.log(items);
+ //           console.log(items);
             callback(null, items);
         }
     });

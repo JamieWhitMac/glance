@@ -307,7 +307,7 @@ function getTeams() {
                 teamList.forEach(readTeams);
 
                 // CHECK FOR ERRORS
-
+                getGoldEvents();
                 getInitialHeroPositions();
             }
         });
@@ -404,6 +404,7 @@ function assignTeams (teamObject) {
 // End of first time setup
 
 function visualisationUpdateLoop() {
+    getGoldEvents();
     getHeroPositions();
     generateRadiantControlHeatmap();
     generateDireControlHeatmap();
@@ -411,6 +412,60 @@ function visualisationUpdateLoop() {
     getHealthData();
     drawPlayers();
  //  console.log("loop!");
+}
+
+function getGoldEvents() {
+       var requrl = "/users/getlatestgoldevents?";
+        if (playerList.length == 10) {
+            var playerNumber = 1;
+            playerList.forEach(function(player){
+                if (playerNumber == 1){
+                   var newurl = requrl+"player"+playerNumber+"="+player.playerID;
+                   requrl = newurl;
+                }
+                else {
+                var newurl =  requrl+"&player"+playerNumber+"="+player.playerID;
+                requrl = newurl;
+            }
+         //   console.log(requrl);
+            playerNumber++;
+            });
+        }
+        else {
+            console.log ("Wrong number of players: "+playerList.length);
+        }
+            var newurl = requrl+"&time="+currentGameTime+"&limit="+maxQueryResponse+"&matchid="+selectedMatch;
+            requrl = newurl;
+        $.ajax({
+            url:requrl,
+            contentType: "application/json",
+            success: function(response) {
+                response.reverse();
+                response.forEach(function(goldEvent) {
+                logGoldEvent(goldEvent);
+            });
+            }
+        });
+}
+
+function logGoldEvent(goldEvent){
+    var splitString = goldEvent.currentPropertyValue.split(",");
+    var xPos = splitString[0];
+    var yPos = splitString[1];
+    var goldEarned = splitString[2];
+
+    var goldEarnedEvent = {
+        xPos,
+        yPos,
+        goldEarned
+    }
+
+heroList.forEach(function(hero) {
+    if (hero.player.playerID == goldEvent.entityID) {
+        hero.goldEvents.push(goldEarnedEvent);
+        console.log(goldEvent);
+    }
+});
 }
 
 function getHeroPositions() {
@@ -443,10 +498,6 @@ function getHeroPositions() {
                 response.forEach(function(movement) {
                 logMovement(movement);
             });
-          //  generateRadiantControlHeatmap();
-          //  generateDireControlHeatmap();
-          //  getObserverData();
-          //  drawPlayers();
             }
         });
 }
@@ -761,6 +812,7 @@ function Player(playerID) {
 function Hero(heroID, player) {
     this.heroID = heroID;
     this.player = player;
+    this.goldEvents = [];
     this.positions = [];
     this.isAlive = true;
 }

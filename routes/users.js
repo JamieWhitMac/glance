@@ -11,7 +11,7 @@ router.get("/getpositiondata", (req, res, next) => {
         if (err) throw err;
         if (data) {
          console.log("data here");
-         console.log(data);
+ //        console.log(data);
          res.send(data);
            // res.send (data);
         }
@@ -28,7 +28,7 @@ router.get("/getnames", (req, res, next) => {
         if (err) throw err;
         if (data) {
          console.log("Names here");
-         console.log(data);
+ //        console.log(data);
          res.send(data);
         }
         if (!data) {
@@ -44,7 +44,7 @@ router.get("/getteams", (req, res, next) => {
         if (err) throw err;
         if (data) {
          console.log("Teams here");
-         console.log(data);
+ //        console.log(data);
          res.send(data);
         }
         if (!data) {
@@ -60,7 +60,7 @@ router.get("/getteams", (req, res, next) => {
         if (err) throw err;
         if (data) {
          console.log("Players here");
-         console.log(data);
+   //      console.log(data);
          res.send(data);
         }
         if (!data) {
@@ -76,7 +76,7 @@ router.get("/getheroes", (req, res, next) => {
         if (err) throw err;
         if (data) {
          console.log("Heroes here");
-         console.log(data);
+    //     console.log(data);
          res.send(data);
         }
         if (!data) {
@@ -92,7 +92,7 @@ router.get("/getinitialpositions", (req, res, next) => {
         if (err) throw err;
         if (data) {
          console.log("Positions here");
-         console.log(data);
+     //    console.log(data);
          res.send(data);
         }
         if (!data) {
@@ -116,7 +116,7 @@ router.get("/getlatestpositions", (req, res, next) => {
     heroArray.push(req.query.hero9);
     heroArray.push(req.query.hero10);
 
-    console.log(heroArray);
+    // console.log(heroArray);
 
     var matchID = req.query.matchid;
 
@@ -124,11 +124,43 @@ router.get("/getlatestpositions", (req, res, next) => {
         if (err) throw err;
         if (data) {
          console.log("Positions here");
-         console.log(data);
+       //  console.log(data);
          res.send(data);
         }
         if (!data) {
             res.send("No positions");
+        }
+    });
+});
+
+// Get gold data
+router.get("/getlatestgoldevents", (req, res, next) => {
+    var playerArray = [];
+
+    playerArray.push(req.query.player1);
+    playerArray.push(req.query.player2);
+    playerArray.push(req.query.player3);
+    playerArray.push(req.query.player4);
+    playerArray.push(req.query.player5);
+    playerArray.push(req.query.player6);
+    playerArray.push(req.query.player7);
+    playerArray.push(req.query.player8);
+    playerArray.push(req.query.player9);
+    playerArray.push(req.query.player10);
+
+   // console.log(heroArray);
+
+    var matchID = req.query.matchid;
+
+    User.getLatestDataAboutEntity(playerArray, "GoldEarnedEvent", req.query.limit, req.query.time, matchID, (err, data) => {
+        if (err) throw err;
+        if (data) {
+         console.log("Gold here");
+         console.log(data);
+         res.send(data);
+        }
+        if (!data) {
+            res.send("No gold");
         }
     });
 });
@@ -141,7 +173,7 @@ router.get("/getlatestpositions", (req, res, next) => {
         if (err) throw err;
         if (data) {
          console.log("Observers here");
-         console.log(data);
+  //       console.log(data);
          res.send(data);
         }
         if (!data) {
@@ -158,7 +190,7 @@ router.get("/gethealthdata", (req, res, next) => {
         if (err) throw err;
         if (data) {
          console.log("Health data here");
-         console.log(data);
+   //      console.log(data);
          res.send(data);
         }
         if (!data) {
@@ -173,6 +205,8 @@ router.get("/gethealthdata", (req, res, next) => {
 
 
 
+
+
 // Get match IDs
 router.get("/getmatches", (req, res, next) => {
     var matchID = req.query.matchid;
@@ -180,7 +214,7 @@ router.get("/getmatches", (req, res, next) => {
         if (err) throw err;
         if (data) {
          console.log("Matches here");
-         console.log(data);
+ //        console.log(data);
          res.send(data);
         }
         if (!data) {
