@@ -778,6 +778,8 @@ radiantGoldHeatmap = h337.create(radiantGoldHeatmapConfig);
         data: goldDataArray
     };
 
+    //
+
     radiantGoldHeatmap.setData(data);
 }
 
