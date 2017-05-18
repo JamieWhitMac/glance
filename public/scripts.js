@@ -699,10 +699,14 @@ radiantControlHeatmap = h337.create(radiantControlHeatmapConfig);
         hero.positions.forEach(function(position){
             var xPos = convertToRange(position.xPos, [(-7500), 7500], [0, visualisationSize]);
             var yPos = convertToRange(position.yPos, [(-7500), 7500], [0, visualisationSize]);
+
+            var xPos = convertToRange(position.xPos, [(-7500), 7500], [0, canvas.width]);
+            var yPos = convertToRange(position.yPos, [(-7500), 7500], [0, canvas.height]);
+
             var weightVal = 1;
             var point = {
                 x: xPos,
-                y: visualisationSize-yPos,
+                y: canvas.height-yPos,
                 value: weightVal
             };
             positionDataArray.push(point);
