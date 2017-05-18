@@ -1,4 +1,4 @@
 module.exports = {
-    database: "mongodb://localhost:27017/dotadata",
+    database: "mongodb://glanceadmin:dotadata@ds143141.mlab.com:43141/glancedata",
     secret: "secret"
 }
