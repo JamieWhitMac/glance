@@ -24,7 +24,7 @@ const app = express();
 
 const users = require("./routes/users");
 
-const port = process.env.port || 8080;
+const port = process.env.PORT || 5000;
 
 // const port = 3000;
 
@@ -41,8 +41,8 @@ app.use("/users", users);
 
 // Index route
 app.get("/", (req, res) => {
-    res.sendFile(path.join(__dirname, 'public/index.html'));
-   // res.send("Hello there.");
+   // res.sendFile(path.join(__dirname, 'public/index.html'));
+    res.send("Hello there.");
 });
 
 //app.get('*', (req, res) => {
