@@ -2,6 +2,9 @@ body {
     background-color: gray;
 }
 
+#mapImage {
+}
+
 #logo {
     width: 100%;
     z-index: 10;
@@ -60,7 +63,8 @@ body {
     padding: 0px; 
     border: 0px;
     margin: 0px; 
-    position: absolute !important
+    position: absolute !important;
+    top: 0; bottom: 0; left: 0; right: 0;
     }
 
     #direGoldHeatmap {
@@ -69,7 +73,8 @@ body {
     padding: 0px; 
     border: 0px; 
     margin: 0px;
-    position: absolute !important
+    position: absolute !important;
+    top: 0; bottom: 0; left: 0; right: 0;
     }
 
 #radiantGoldHeatmap {
@@ -78,7 +83,8 @@ body {
     padding: 0px; 
     border: 0px;
     margin: 0px; 
-    position: absolute !important
+    position: absolute !important;
+    top: 0; bottom: 0; left: 0; right: 0;
     }
 
 #canvas {
@@ -100,7 +106,8 @@ body {
     left: 0px; 
     right: 0px; 
     bottom: 0px; 
-    position: absolute 
+    position: absolute;
+    z-index: -20;
     }
 
 #eventStream {

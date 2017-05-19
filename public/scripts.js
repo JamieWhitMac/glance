@@ -30,11 +30,11 @@ var direControlHeatmap;
 var radiantControlHeatmapConfig;
 var direControlHeatmapConfig;
 
-var radiantGoldHeatmap;
-var direGoldHeatmap;
+//var radiantGoldHeatmap;
+//var direGoldHeatmap;
 
-var radiantGoldHeatmapConfig;
-var direGoldHeatmapConfig;
+//var radiantGoldHeatmapConfig;
+//var direGoldHeatmapConfig;
 
 var canvas;
 var ctx;
@@ -86,23 +86,23 @@ ctx = canvas.getContext("2d");
     visualisationLoopTime = 2000;
     matchSelectLoopTime = 3000;
 
-    radiantGoldHeatmapConfig = {
-        container: document.getElementById("radiantGoldHeatmap"),
-        gradient: {
-    ".5": "#46b72d",
-    ".8": "#b1e04c",
-    ".95": "#f2d530"
-        }
-    }
+//    radiantGoldHeatmapConfig = {
+//        container: document.getElementById("radiantGoldHeatmap"),
+//        gradient: {
+//    ".5": "#46b72d",
+//    ".8": "#b1e04c",
+//    ".95": "#f2d530"
+//        }
+//    }
 
-    direGoldHeatmapConfig = {
-        container: document.getElementById("direGoldHeatmap"),
-        gradient: {
-            ".5": "#b72d2d",
-            ".8": "#f2a73e",
-            ".95": "#f2d530"
-        }
-    }
+ //   direGoldHeatmapConfig = {
+ //       container: document.getElementById("direGoldHeatmap"),
+ //       gradient: {
+ //           ".5": "#b72d2d",
+ //           ".8": "#f2a73e",
+ //           ".95": "#f2d530"
+ //       }
+ //   }
 
     radiantControlHeatmapConfig = {
         container: document.getElementById("radiantHeatmap"),
@@ -377,16 +377,17 @@ function getInitialHeroPositions() {
         });
     });
 });
-            generateRadiantControlHeatmap();
-            generateRadiantGoldHeatmap();
-            generateDireGoldHeatmap();
-            generateDireControlHeatmap();
+            //generateRadiantControlHeatmap();
+            gRCHU();
+           // generateRadiantGoldHeatmap();
+            //generateDireGoldHeatmap();
+            //generateDireControlHeatmap();
             $("#radiantGoldHeatmap").hide();
             $("#direGoldHeatmap").hide();
             getObserverData();
             getHealthData();
 
-            drawPlayers();
+           // drawPlayers();
             visualisationLoopingInterval = setInterval(visualisationUpdateLoop, visualisationLoopTime);
 }
 
@@ -484,13 +485,14 @@ function visualisationUpdateLoop() {
     getGoldEvents();
     getHeroPositions();
     visualisationSize = document.getElementById('visualisationDiv').offsetWidth;
-    generateRadiantGoldHeatmap();
-    generateDireGoldHeatmap();
-    generateRadiantControlHeatmap();
-    generateDireControlHeatmap();
+    //generateRadiantGoldHeatmap();
+    //generateDireGoldHeatmap();
+    //generateRadiantControlHeatmap();
+    gRCHU();
+    //generateDireControlHeatmap();
     getObserverData();
     getHealthData();
-    drawPlayers();
+   // drawPlayers();
 
  //  console.log("loop!");
 }
@@ -544,6 +546,10 @@ function logGoldEvent(goldEvent){
 heroList.forEach(function(hero) {
     if (hero.player.playerID == goldEvent.entityID) {
         hero.goldEvents.push(goldEarnedEvent);
+             if (hero.goldEvents.length>50){
+       hero.goldEvents.shift();
+     }
+
     }
 });
 }
@@ -730,18 +736,42 @@ visualisationSize = document.getElementById('visualisationDiv').offsetWidth;
     var positionDataArray = [];
     team.heroes.forEach(function(hero){
         hero.positions.forEach(function(position){
-            var xPos = convertToRange(position.xPos, [(-7500), 7500], [0, visualisationSize]);
-            var yPos = convertToRange(position.yPos, [(-7500), 7500], [0, visualisationSize]);
+            var xPos = convertToRange(position.xPos, [(-7500), 7500], [0, 380]);
+            var yPos = convertToRange(position.yPos, [(-7500), 7500], [0, 380]);
 
             var weightVal = 1;
             var point = {
                 x: xPos,
-                y: visualisationSize-yPos,
+                y: 380-yPos,
                 value: weightVal
             };
             positionDataArray.push(point);
         });
     });
+
+    var points = [];
+var max = 0;
+var width = 380;
+var height = 380;
+var len = 200;
+
+while (len--) {
+  var val = Math.floor(Math.random()*100);
+  max = Math.max(max, val);
+  var point = {
+    x: Math.floor(Math.random()*width),
+    y: Math.floor(Math.random()*height),
+    value: val
+  };
+  points.push(point);
+}
+// heatmap data format
+var dataPlaceholder = { 
+  max: max, 
+  data: positionDataArray 
+};
+
+console.log (positionDataArray);
 
     var data = {
         min: 0,
@@ -749,7 +779,98 @@ visualisationSize = document.getElementById('visualisationDiv').offsetWidth;
         data: positionDataArray
     };
 
+//console.log(data);
+    radiantControlHeatmap.setData(dataPlaceholder);
+   // radiantControlHeatmap.setData(data);
+}
+
+function gRCHU() {
+    if (radiantControlHeatmap == null) {
+        radiantControlHeatmap = h337.create(radiantControlHeatmapConfig);
+    }
+
+    if (direControlHeatmap == null) {
+        direControlHeatmap = h337.create(direControlHeatmapConfig);
+    }
+
+    var movementArray = [];
+    var maxMovement = 15;
+    var movementWidth = 380;
+    var movementHeight = 380;
+
+    teamDict["radiant"].heroes.forEach(function (hero){
+        var heroPositionArray = hero.positions;
+        heroPositionArray.forEach(function (movement){
+            //var xPos = movement.xPos/100;
+            //var yPos = movement.yPos/100;
+            var xPos = convertToRange(movement.xPos, [(-7500), 7500], [0, 380]);
+            var yPos = convertToRange(movement.yPos, [(-7500), 7500], [0, 380]);
+            var movementValue = 1;
+
+            var point = {
+                x: xPos,
+                y: 380-yPos,
+                value: movementValue
+            }
+            movementArray.push(point);
+        });
+    });
+
+    var data = {
+        max: maxMovement,
+        data: movementArray
+    }
+
+    var direMovementArray = [];
+
+    teamDict["dire"].heroes.forEach(function (hero){
+        var heroPositionArray = hero.positions;
+        heroPositionArray.forEach(function (movement){
+            //var xPos = movement.xPos/100;
+            //var yPos = movement.yPos/100;
+            var xPos = convertToRange(movement.xPos, [(-7500), 7500], [0, 380]);
+            var yPos = convertToRange(movement.yPos, [(-7500), 7500], [0, 380]);
+            var movementValue = 1;
+
+            var point = {
+                x: xPos,
+                y: 380-yPos,
+                value: movementValue
+            }
+            direMovementArray.push(point);
+        });
+    });
+
+    var direData = {
+        max: maxMovement,
+        data: direMovementArray
+    }
+
+   var points = [];
+var max = 0;
+var width = 380;
+var height = 380;
+var len = 200;
+
+while (len--) {
+  var val = Math.floor(Math.random()*100);
+  max = Math.max(max, val);
+  var point = {
+    x: Math.floor(Math.random()*width),
+    y: Math.floor(Math.random()*height),
+    value: val
+  };
+  points.push(point);
+}
+// heatmap data format
+var dataPlaceholder = { 
+  max: max, 
+  data: points 
+};
+
     radiantControlHeatmap.setData(data);
+    direControlHeatmap.setData(direData);
+   //radiantControlHeatmap.setData(dataPlaceholder);
 }
 
 function generateDireControlHeatmap() {
@@ -816,6 +937,8 @@ visualisationSize = document.getElementById('visualisationDiv').offsetWidth;
         max: 300,
         data: goldDataArray
     };
+
+    //console.log(goldDataArray);
 
     //
 
