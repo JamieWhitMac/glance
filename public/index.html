@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html>
     <head>
+        <link rel="stylesheet" href="themes/Glance.min.css" />
+        <link rel="stylesheet" href="themes/jquery.mobile.icons.min.css" />
         <link rel="stylesheet" href="https://code.jquery.com/mobile/1.4.5/jquery.mobile-1.4.5.min.css" />
         <link rel="stylesheet" type="text/css" href="style.css">
         <script src="https://code.jquery.com/jquery-1.11.1.min.js"></script>
@@ -11,21 +13,20 @@
     </head>
     <body>
         <div data-role="page" id="matchSelector">
+            <img src="Background 2.jpg" id = "background"></img>
             <div data-role="main" class = "ui-content">
-                <h2>Glance for Dota</h2>
-                <p>Please select a match:</p>
-                <div class="ui-field-contain">
-                    <select class = "selector" name="select-custom-1" id="matchSel" data-native-menu="false">
-                        <option id="nullOption"value="choose-one" data-placeholder="true">Choose one...</option>
+                <img src="Glance Logo.png" id = "logo"></img>
+                <div class="ui-field-contain" id="matchSelContainer">
+                    <select class = "selector selector-d" name="select-custom-1" id="matchSel" data-native-menu="false" data-theme="d">
+                        <option id="nullOption"value="choose-one" data-placeholder="true">Select a Match to Spectate</option>
                     </select>
 
                 </div>
-                <a href="#glanceVisualisation" id = "matchSelectButton" class="ui-btn ui-corner-all" data-transition="slide">Select Match</a>
+                <a href="#glanceVisualisation" id = "matchSelectButton" class="ui-btn ui-corner-all" data-disabled = "true" data-transition="slide">Select Match</a>
             </div>
         </div>
-        <div data-role="page" id="glanceVisualisation">
+        <div data-role="page" id="glanceVisualisation" data-theme = "d">
             <div data-role="main" class = "ui-content">
-                <h2>Glance for Dota</h2>
 
                 <div id = "visualisationDiv">
                     <div id = "positionHelperDiv">
@@ -38,7 +39,7 @@
                     </div>
                     <div class="heatmap4" id = "direGoldHeatmap">
                     </div>
-                    <canvas id = "canvas" width = "500" height = "500"></canvas>
+                    <canvas id = "canvas" width="500px" height="500px"></canvas>
                     </div>
                   </div>
                    <select class = "selector" name="select-custom-2" id="heatmapSelector" data-native-menu="false">

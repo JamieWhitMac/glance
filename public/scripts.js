@@ -50,7 +50,15 @@ var heatmapFunctionsDict;
 
 var observerIcon;
 
+var radiantObserverIcon;
+var direObserverIcon;
+
+var radiantDeathIcon;
+var direDeathIcon;
+
 $( document ).ready(function() {
+
+    document.getElementById("matchSelectButton").style.visibility = "hidden";
 
 canvas = document.getElementById("canvas");
 ctx = canvas.getContext("2d");
@@ -114,7 +122,7 @@ ctx = canvas.getContext("2d");
         }
     }
 
-    visualisationSize = $("#visualisationDiv").height();
+    visualisationSize = document.getElementById('visualisationDiv').offsetWidth;
 
     var v = 1600;
 
@@ -207,10 +215,11 @@ ctx = canvas.getContext("2d");
 
     //
 
-    loadObserverIcon();
+    loadAdditionalIcons();
 
 $("#matchSel").change(function() {
     selectedMatch = this.value;
+    document.getElementById("matchSelectButton").style.visibility = "visible";
    // $("#selector").append('<option value="4">The 4th Option</option>');
   // console.log(selectedMatch);
 });
@@ -426,11 +435,31 @@ function loadHeroIcon(heroName) {
    // iconObj.src = ""
 }
 
-function loadObserverIcon() {
-    var iconObj = new Image();
-    iconObj.src = "minimapicons/observerWard.png";
-    observerIcon = iconObj;
+function loadAdditionalIcons() {
+    var observerIconObj = new Image();
+    observerIconObj.src = "minimapicons/observerWard.png";
+    observerIcon = observerIconObj;
+
+    var radiantObserverIconObj = new Image();
+    radiantObserverIconObj.src = "minimapIcons/radiant_observer.png";
+    radiantObserverIcon = radiantObserverIconObj;
+
+    var direObserverIconObj = new Image();
+    direObserverIconObj.src = "minimapIcons/dire_observer.png";
+    direObserverIcon = direObserverIconObj;
+
+    var radiantDeathIconObj = new Image();
+    radiantDeathIconObj.src="minimapicons/radiant_death.png";
+    radiantDeathIcon = radiantDeathIconObj;
+
+    var direDeathIconObj = new Image();
+    direDeathIconObj.src="minimapicons/dire_death.png";
+    direDeathIcon = direDeathIconObj;
    // iconObj.src = ""
+}
+
+function loadDeathIcons() {
+    var iconObjRadiant = new Image
 }
 
 function assignTeams (teamObject) {
@@ -454,6 +483,7 @@ function assignTeams (teamObject) {
 function visualisationUpdateLoop() {
     getGoldEvents();
     getHeroPositions();
+    visualisationSize = document.getElementById('visualisationDiv').offsetWidth;
     generateRadiantGoldHeatmap();
     generateDireGoldHeatmap();
     generateRadiantControlHeatmap();
@@ -461,6 +491,7 @@ function visualisationUpdateLoop() {
     getObserverData();
     getHealthData();
     drawPlayers();
+
  //  console.log("loop!");
 }
 
@@ -692,6 +723,8 @@ function generateRadiantControlHeatmap() {
 if (radiantControlHeatmap == null){
 radiantControlHeatmap = h337.create(radiantControlHeatmapConfig);
 }
+
+visualisationSize = document.getElementById('visualisationDiv').offsetWidth;
     var team = teamDict["radiant"];
     //console.log(team.name);
     var positionDataArray = [];
@@ -700,13 +733,10 @@ radiantControlHeatmap = h337.create(radiantControlHeatmapConfig);
             var xPos = convertToRange(position.xPos, [(-7500), 7500], [0, visualisationSize]);
             var yPos = convertToRange(position.yPos, [(-7500), 7500], [0, visualisationSize]);
 
-            var xPos = convertToRange(position.xPos, [(-7500), 7500], [0, canvas.width]);
-            var yPos = convertToRange(position.yPos, [(-7500), 7500], [0, canvas.height]);
-
             var weightVal = 1;
             var point = {
                 x: xPos,
-                y: canvas.height-yPos,
+                y: visualisationSize-yPos,
                 value: weightVal
             };
             positionDataArray.push(point);
@@ -727,22 +757,21 @@ function generateDireControlHeatmap() {
         direControlHeatmap = h337.create(direControlHeatmapConfig);
     }
 
+    visualisationSize = document.getElementById('visualisationDiv').offsetWidth;
+
     var team = teamDict["dire"];
    // console.log(team.name);
     var positionDataArray = [];
     team.heroes.forEach(function(hero){
         hero.positions.forEach(function(position){
-           // var xPos = convertToRange(position.xPos, [(-7500), 7500], [0, visualisationSize]);
-           // var yPos = convertToRange(position.yPos, [(-7500), 7500], [0, visualisationSize]);
 
-             var xPos = convertToRange(position.xPos, [(-7500), 7500], [0, canvas.width]);
-           var yPos = convertToRange(position.yPos, [(-7500), 7500], [0, canvas.height]);
+            var xPos = convertToRange(position.xPos, [(-7500), 7500], [0, visualisationSize]);
+            var yPos = convertToRange(position.yPos, [(-7500), 7500], [0, visualisationSize]);
 
             var weightVal = 1;
             var point = {
                 x: xPos,
-             //   y: visualisationSize-yPos,
-             y: canvas.height-yPos,
+                y: visualisationSize-yPos,
                 value: weightVal
             };
             positionDataArray.push(point);
@@ -764,6 +793,7 @@ function generateRadiantGoldHeatmap() {
 if (radiantGoldHeatmap == null){
 radiantGoldHeatmap = h337.create(radiantGoldHeatmapConfig);
 }
+visualisationSize = document.getElementById('visualisationDiv').offsetWidth;
     var team = teamDict["radiant"];
     //console.log(team.name);
     var goldDataArray = [];
@@ -796,6 +826,7 @@ function generateDireGoldHeatmap() {
 if (direGoldHeatmap == null){
 direGoldHeatmap = h337.create(direGoldHeatmapConfig);
 }
+visualisationSize = document.getElementById('visualisationDiv').offsetWidth;
     var team = teamDict["dire"];
     //console.log(team.name);
     var goldDataArray = [];
@@ -885,6 +916,15 @@ function drawPlayers () {
             var iconHeight = 35;
             ctx.drawImage(heroIconDict[hero.name], xPos-iconWidth/2, canvas.height-yPos-iconHeight/2, iconWidth, iconHeight);
 
+            if (hero.health == 0) {
+                if (team.name == "radiant") {
+                    ctx.drawImage(radiantDeathIcon, xPos-iconWidth/2, canvas.height-yPos-iconHeight/2, iconWidth, iconHeight);
+                }
+                else {
+                        ctx.drawImage(direDeathIcon, xPos-iconWidth/2, canvas.height-yPos-iconHeight/2, iconWidth, iconHeight);
+                }
+            }
+
             }
         });
     });
@@ -911,13 +951,19 @@ function drawPlayers () {
             
             ctx.beginPath();
             ctx.arc(xPos,canvas.height-yPos,convertToRange(1000, [(0), 15000], [0, canvas.width]),0,2*Math.PI);
-            console.log(wardRadius);
+            //console.log(wardRadius);
             //ctx.stroke();
             ctx.fill();
 
             var iconWidth = 35;
             var iconHeight = 35;
-            ctx.drawImage(observerIcon, xPos-iconWidth/2, canvas.height-yPos-iconHeight/2, iconWidth, iconHeight);
+            if (ward.hero.team.name == "radiant"){
+                ctx.drawImage(radiantObserverIcon, xPos-iconWidth/2, canvas.height-yPos-iconHeight/2, iconWidth, iconHeight);
+            }
+            else {
+                ctx.drawImage(direObserverIcon, xPos-iconWidth/2, canvas.height-yPos-iconHeight/2, iconWidth, iconHeight);
+            }
+            //ctx.drawImage(observerIcon, xPos-iconWidth/2, canvas.height-yPos-iconHeight/2, iconWidth, iconHeight);
         }
         }
     }
@@ -947,6 +993,10 @@ function addToEventFeed (gEvent) {
     }
 
     eventFeed.prepend(listItem);
+    var listLength = $("#eventBuffer li").length;
+    if(listLength>5) {
+        $("#eventBuffer li:last-child").remove();
+    }
     eventFeed.listview('refresh', true);
 }
 
@@ -985,9 +1035,9 @@ function GameEvent(hero, type, xPos, yPos, gameTime) {
 // Helper functions
 
 function convertFromGameUnits(value) {
-    console.log("initial value: ")+value;
+    //console.log("initial value: ")+value;
     var newValue = convertToRange(value, [(-7500), 7500], [0, visualisationSize]);
-    console.log("new value: ")+newValue;
+    //console.log("new value: ")+newValue;
     return newValue;
 }
 
